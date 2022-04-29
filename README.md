@@ -17,5 +17,10 @@ In general there needs to be a consistent set of aliases across all containers. 
 
 This alias provides the active version number for the container.  By default this is the alpine version running.  But this should be overloaded by downstream containers to be the active version of whatever the software is that we are running.
 
+**Alpine Linux Version**
+
+```
+awk -F= '$1=="VERSION_ID" { print $2 ;}' /etc/os-release
+```
 
 https://linuxhandbook.com/linux-alias-command/
