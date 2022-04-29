@@ -6,4 +6,4 @@ RUN apk add --no-cache tzdata
 RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 
-ENTRYPOINT ["tail", "--follow", "/dev/null"]
+ENTRYPOINT ["/usr/bin/tail", "--follow", "/dev/null"]
