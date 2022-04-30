@@ -1,3 +1,3 @@
-version() {
- /usr/bin/awk -F= '$1=="VERSION_ID" {print $2}' /etc/os-release ;
-}
+alias version='osversion'
+
+version() { echo "Hello World!"; }
