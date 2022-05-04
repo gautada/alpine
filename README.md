@@ -1,14 +1,22 @@
 # Alpine
 
-A very simple container that uses [Alpine Linux]().  This container is designed to be the default base for most containers in this library.
+[Alpine Linux](https://alpinelinux.org) is an independent, non-commercial, general purpose Linux distribution designed for power users who appreciate security, simplicity and resource efficiency.
 
-## Build
+A very simple container that uses [Alpine Linux](https://alpinelinux.org).  This container is designed to be the default base for most containers in this library.
+
+## Container
+
+### Versions
+
+- - April 30, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.15 .4](https://git.alpinelinux.org/aports/log/?h=v3.15.4)
+
+### Build
 
 ```
-docker build --build-arg ALPINE_VERSION=3.15.3 --file Containerfile --no-cache --tag alpine:dev .
+docker build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:dev .
 ``` 
 
-## Run
+### Run
 
 This container is designed to run in detatched mode.  As such the main **CMD** launched `crond` therefore to run the container execute:
 
@@ -27,6 +35,9 @@ To kill the container just execute:
 ```
 docker stop alpine
 ```
+
+### Release
+
 
 ## Setup and Configuration
 

@@ -1,6 +1,7 @@
 ARG ALPINE_VERSION=3.15.4
 FROM alpine:$ALPINE_VERSION
 
+LABEL version="2022-04-29"
 LABEL source="https://github.com/gautada/alpine-container.git"
 LABEL maintainer="Adam Gautier <adam@gautier.org>"
 LABEL description="This container is a basic Alpine Linux distribution for use as the basis for other containers."
