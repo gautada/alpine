@@ -1,0 +1,33 @@
+#!/bin/ash
+
+## [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint)
+## An ENTRYPOINT allows you to configure a container that will run as an executable.
+##
+## This is the default ENTRYPOINT and will be augmented and used by downstream
+## containers.
+##
+## To use downstream change the configuration in `/etc/entrypoint.conf` and
+## put the container script in `/etc/entrypoint.d`. This script just calls all
+## of the scripts (note: must be '.sh' files) loaded into `/etc/entrypoint.d`.
+
+echo "---------- [ ENTRYPOINT: Alpine(version) ] ----------"
+if [ -z "$@" ] ; then
+ # No parameters so do not pass to part
+ run-parts --exit-on-error /etc/entrypoint.d
+else
+  run-parts -a "$@" --exit-on-error /etc/entrypoint.d
+fi
+if [ $? -eq 0 ]; then
+ exec $@
+else
+ echo "[ERROR]: An entrypint script in /etc/entrypoint.d failed."
+fi
+
+
+# https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
+# https://ostechnix.com/how-to-run-all-scripts-in-a-directory-in-linux/
+
+# exec $@
+
+
+

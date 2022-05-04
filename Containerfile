@@ -10,12 +10,20 @@ LABEL description="This container is a basic Alpine Linux distribution for use a
 
 ENV ENV="/etc/profile"
 
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache sudo tzdata
 RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
+
+RUN echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers
 
 COPY version.sh /etc/profile.d/version.sh
 COPY os-version.sh /etc/profile.d/os-version.sh
 
+
+COPY entrypoint.conf /etc/entrypoint.conf
+COPY entrypoint /entrypoint
+COPY os-entrypoint.sh /etc/entrypoint.d/00-os-entrypoint.sh
+
+ENTRYPOINT ["/entrypoint"]
 # ENTRYPOINT ["/usr/bin/tail", "-f", "/dev/null"]
-CMD ["/usr/sbin/crond", "-f", "-l", "0"]
+# CMD ["/usr/sbin/crond", "-f", "-l", "0"]
