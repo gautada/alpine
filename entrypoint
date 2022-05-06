@@ -10,15 +10,20 @@
 ## put the container script in `/etc/entrypoint.d`. This script just calls all
 ## of the scripts (note: must be '.sh' files) loaded into `/etc/entrypoint.d`.
 
-echo "---------- [ ENTRYPOINT: Alpine(version) ] ----------"
-if [ -z "$@" ] ; then
- # No parameters so do not pass to part
- run-parts --exit-on-error /etc/entrypoint.d
-else
-  run-parts -a "$@" --exit-on-error /etc/entrypoint.d
-fi
+echo "---------- [ ENTRYPOINT: Alpine($(version)) ] ----------"
+run-parts -a "$@" --exit-on-error /etc/entrypoint.d
+# export ENV="/etc/profile"
+# if [ -z "$@" ] ; then
+#  # No parameters so do not pass to part
+#  run-parts --exit-on-error /etc/entrypoint.d
+# else
+#
+# fi
+
 if [ $? -eq 0 ]; then
- exec $@
+ if [ "default" != "$1" ] ; then
+  exec $@
+ fi
 else
  echo "[ERROR]: An entrypint script in /etc/entrypoint.d failed."
 fi

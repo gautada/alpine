@@ -1,3 +1,0 @@
-alias version='osversion'
-
-

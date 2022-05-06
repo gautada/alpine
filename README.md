@@ -22,6 +22,7 @@ This container is designed to run in detatched mode.  As such the main **CMD** l
 
 ```
 docker run --detach --name alpine --rm alpine:dev  
+docker run --interactive --name alpine --rm --tty --volume ~/Workspace/alpine/bastion:/opt/bastion alpine:dev /bin/ash
 ```
 
 To interact with the container just execute:
@@ -36,24 +37,29 @@ To kill the container just execute:
 docker stop alpine
 ```
 
-### Release
+### Container Configuration
 
+These are the container configurations usually made in the `Containerfile` and may be over-ridden in downstream containers.
+ 
+#### Profile
+ 
+Load the system profile when you exec the `ash` shell inside docker. This provides a convenienc for the 
+profile to loaded automatically when the container is `run` or `exec` with `/bin/ash`. The
+profile will provide consistency and a customization point for downtstream
+containers. Usually to customize just add scripts `/etc/profile.d` folder
 
-## Setup and Configuration
-
-This is the core/default starting point for all of my containers.  As such there are several configurations that are used to get everything just the way I like it.
-
-### Profile
-
-Load the system profile when you exec the `ash` shell inside docker
-
+Enable profile to be executed automatically
 ```
 ENV ENV="/etc/profile"
 ```
 
-### Timezone
+This the operating system container defines two version [aliases](https://linuxhandbook.com/linux-alias-command/) (`osversion` and `cversion`)
+- **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
+- **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
 
-Set the timezone to New York a.k.a US/Eastern
+#### Timezone
+
+Set the timezone to US/New York a.k.a US/Eastern.  This provides consistency across containers.
 
 ```
 RUN apk add --no-cache tzdata
@@ -61,18 +67,4 @@ RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 ```
 
-### Aliases
 
-In general there needs to be a consistent set of aliases across all containers.  For example an `aliases.sh` file is used to make the process easier and is placed in the `/etc/profile.d` folder.
-
-#### Version
-
-This profile script `version.sh` by default provides the specific Alpine Linux version number that is being used. This also creates and os-version.sh which is the exact same script but should not be overloaded down stream.
-
-**Alpine Linux Version**
-
-```
-awk -F= '$1=="VERSION_ID" { print $2 ;}' /etc/os-release
-```
-
-https://linuxhandbook.com/linux-alias-command/
