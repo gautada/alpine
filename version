@@ -1,4 +1,7 @@
 #!/bin/ash
+#
+# This is a simple script to initialize the profile and allows for `version` to return the container to work from the docker cli
+#
 for script in /etc/profile.d/*.sh ; do
     if [ -r "$script" ] ; then
         . "$script"

@@ -15,8 +15,10 @@ RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 
 RUN echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
- && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers \
- && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/ssh-keygen" >> /etc/sudoers
+ && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
+
+# && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/ssh-keygen" >> /etc/sudoers
+# can do bastion setup witb docker exec -u 0
  
 VOLUME /opt/bastion
 VOLUME /opt/container
@@ -24,7 +26,6 @@ VOLUME /opt/container
 COPY version /bin/version
 COPY 00-profile.sh /etc/profile.d/00-profile.sh
 
-COPY entrypoint.conf /etc/entrypoint.conf
 COPY entrypoint /entrypoint
 COPY 00-entrypoint.sh /etc/entrypoint.d/00-entrypoint.sh
 

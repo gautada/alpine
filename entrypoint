@@ -10,7 +10,7 @@
 ## put the container script in `/etc/entrypoint.d`. This script just calls all
 ## of the scripts (note: must be '.sh' files) loaded into `/etc/entrypoint.d`.
 
-echo "---------- [ ENTRYPOINT: Alpine($(version)) ] ----------"
+echo "---------- [ ENTRYPOINT: Alpine($(version)-$(whoami)) ] ----------"
 run-parts -a "$@" --exit-on-error /etc/entrypoint.d
 # export ENV="/etc/profile"
 # if [ -z "$@" ] ; then

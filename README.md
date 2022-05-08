@@ -18,23 +18,10 @@ docker build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revi
 
 ### Run
 
-This container is designed to run in detatched mode.  As such the main **CMD** launched `crond` therefore to run the container execute:
+This container is not ment to be the directly run.  Generally, it should be used within a downstream container.
 
 ```
-docker run --detach --name alpine --rm alpine:dev  
-docker run --interactive --name alpine --rm --tty --volume ~/Workspace/alpine/bastion:/opt/bastion alpine:dev /bin/ash
-```
-
-To interact with the container just execute:
-
-```
-docker exec --interactive --tty alpine /bin/ash 
-```
-
-To kill the container just execute:
-
-```
-docker stop alpine
+docker run --interactive --name alpine --port 22:2222 --rm --tty --volume ~/Workspace/alpine/bastion:/opt/bastion alpine:dev /bin/ash
 ```
 
 ### Container Configuration
@@ -66,5 +53,9 @@ RUN apk add --no-cache tzdata
 RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 ```
+
+#### Bastion
+
+A [bastion](https://en.wikipedia.org/wiki/Bastion_host) is a networking host that is designed to withstand external attacks.  The bastion service is a point of entry for accessing the container and the services within. This service is implemented with [openssh](https://www.openssh.com). 
 
 
