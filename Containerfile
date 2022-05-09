@@ -15,9 +15,8 @@ RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 
 RUN echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
- && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
-
-# && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/ssh-keygen" >> /etc/sudoers
+ && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers \
+ && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/ssh-keygen" >> /etc/sudoers
 # can do bastion setup witb docker exec -u 0
  
 VOLUME /opt/bastion
@@ -27,14 +26,15 @@ COPY version /bin/version
 COPY 00-profile.sh /etc/profile.d/00-profile.sh
 
 COPY entrypoint /entrypoint
-COPY 00-entrypoint.sh /etc/entrypoint.d/00-entrypoint.sh
-
+COPY 99-entrypoint.sh /etc/entrypoint.d/99-entrypoint.sh
 ENTRYPOINT ["/entrypoint"]
+
+COPY bastion-setup /usr/bin/bastion-setup
 
 # AuthorizedKeysFile - Specifies the file that contains the public keys used for user authentication. Default is changed to /opt/bastion/ssh/authorized_keys
 # HostKey Specifies a file containing a private host key used by SSH. The defaults are /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key and /etc/ssh/ssh_host_rsa_key
-
 # PermitRootLogin no
+# PasswordAuthentication no
 RUN cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
  && echo "" >> /etc/ssh/sshd_config \
  && echo "" >> /etc/ssh/sshd_config \
@@ -50,7 +50,7 @@ RUN cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
  && echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
  && echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
  
-ARG USER=test
+ARG USER=ansible
 RUN addgroup $USER \
  && adduser -D -s /bin/ash -G $USER $USER \
  && usermod -aG wheel $USER \

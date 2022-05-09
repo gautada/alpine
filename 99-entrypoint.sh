@@ -6,6 +6,12 @@
 # /usr/bin/sudo /usr/bin/ssh-keygen -A -f /opt/bastion/
 
 # Check if bastion folder is provided and the server key folder is provided
+# if [ -d /opt/bastion/ssh ] ; then
+ # /bin/chown -R "$(/usr/bin/whoami)":"$(/usr/bin/whoami)" /opt/bastion/ssh
+ # /bin/chmod 0700 /opt/bastion/ssh
+ # /bin/chown $USER:USER /opt/bastion/ssh/authorized_keys
+ # /bin/chmod 0600 /opt/bastion/ssh/authorized_keys
+# fi
 if [ -d /opt/bastion/etc/ssh ] ; then
  if [ -f "/opt/bastion/ssh/authorized_keys" ] ; then
   echo "---------- [ BASTION(sshd) ] ----------"

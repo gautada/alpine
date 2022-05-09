@@ -1,0 +1,14 @@
+#!/bin/ash
+if [ ! -d /opt/bastion/etc/ssh ] ; then
+ /bin/mkdir -p /opt/bastion/etc/ssh
+ /usr/bin/sudo /usr/bin/ssh-keygen -A -N '' -f /opt/bastion/
+fi
+if [ ! -f /opt/bastion/ssh/authorized_keys ] ; then
+ /bin/mkdir -p /opt/bastion/auth
+ /usr/bin/ssh-keygen -f /opt/bastion/auth/rsa_id -N '' -t rsa
+ /bin/mkdir -p /opt/bastion/ssh
+ /bin/cp /opt/bastion/auth/rsa_id.pub /opt/bastion/ssh/authorized_keys
+ /bin/chown -R "$(/usr/bin/whoami)":"$(/usr/bin/whoami)" /opt/bastion/ssh
+ /bin/chmod 0700 /opt/bastion/ssh
+ /bin/chmod 0600 /opt/bastion/ssh/authorized_keys
+fi

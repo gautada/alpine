@@ -2,4 +2,4 @@
 *.xcodeproj/
 # Ignore Mac OS X folder information file - This should not be needed in SCM
 .DS_Store
-**bastion**
+**bastion/
