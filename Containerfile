@@ -10,23 +10,23 @@ EXPOSE 22/tcp
 
 ENV ENV="/etc/profile"
 
-RUN apk add --no-cache nano openssh sudo shadow tzdata
-RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN echo "America/New_York" > /etc/timezone
+RUN /sbin/apk add --no-cache nano openssh sudo shadow tzdata
+RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN /bin/echo "America/New_York" > /etc/timezone
 
-RUN echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
- && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers \
- && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/ssh-keygen" >> /etc/sudoers
+RUN /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
+ && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
+# && echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/ssh-keygen" >> /etc/sudoers
 # can do bastion setup witb docker exec -u 0
  
 VOLUME /opt/bastion
-VOLUME /opt/container
+VOLUME /opt/ansible
 
 COPY version /bin/version
 COPY 00-profile.sh /etc/profile.d/00-profile.sh
 
 COPY entrypoint /entrypoint
-COPY 99-entrypoint.sh /etc/entrypoint.d/99-entrypoint.sh
+COPY 00-entrypoint.sh /etc/entrypoint.d/00-entrypoint.sh
 ENTRYPOINT ["/entrypoint"]
 
 COPY bastion-setup /usr/bin/bastion-setup
@@ -35,26 +35,30 @@ COPY bastion-setup /usr/bin/bastion-setup
 # HostKey Specifies a file containing a private host key used by SSH. The defaults are /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key and /etc/ssh/ssh_host_rsa_key
 # PermitRootLogin no
 # PasswordAuthentication no
-RUN cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
- && echo "" >> /etc/ssh/sshd_config \
- && echo "" >> /etc/ssh/sshd_config \
- && echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config \
- && echo "" >> /etc/ssh/sshd_config \
- && echo "" >> /etc/ssh/sshd_config \
- && sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config \
- && echo "AuthorizedKeysFile    /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config \
- && sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config \
- && echo "HostKey    /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
- && echo "HostKey    /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
- && echo "HostKey    /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
- && echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
- && echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
- 
-ARG USER=ansible
-RUN addgroup $USER \
- && adduser -D -s /bin/ash -G $USER $USER \
- && usermod -aG wheel $USER \
- && echo "$USER:$USER" | chpasswd
+RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
+ && /bin/echo "" >> /etc/ssh/sshd_config \
+ && /bin/echo "" >> /etc/ssh/sshd_config \
+ && /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config \
+ && /bin/echo "" >> /etc/ssh/sshd_config \
+ && /bin/echo "" >> /etc/ssh/sshd_config \
+ && /bin/sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config \
+ && /bin/echo "AuthorizedKeysFile    /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config \
+ && /bin/sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config \
+ && /bin/echo "HostKey    /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
+ && /bin/echo "HostKey    /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
+ && /bin/echo "HostKey    /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
+ && /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
+ && /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
+
+
+ARG USER=ansible
+RUN /bin/mkdir -p /opt/$USER \
+ && /usr/sbin/addgroup $USER \
+ && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
+ && /usr/sbin/usermod -aG wheel $USER \
+ && /bin/echo "$USER:$USER" | chpasswd \
+ && /bin/chown $USER:$USER -R /opt/$USER
+ 
 USER $USER
 WORKDIR /home/$USER
