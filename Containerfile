@@ -52,8 +52,6 @@ RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
  && /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
  && /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
-
-
 ARG USER=ansible
 RUN /bin/mkdir -p /opt/$USER \
  && /usr/sbin/addgroup $USER \
