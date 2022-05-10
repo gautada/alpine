@@ -1,3 +1,10 @@
+#!/bin/ash
+#
+# This script sets two alias for printing the os and container version
+#
+
+# There are various choice to get the os version on Alpine Linux.
+
 # osversion() {
  # Mechanism One
  # source /etc/os-release

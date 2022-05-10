@@ -1,38 +1,27 @@
 #!/bin/ash
-
-## [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint)
-## An ENTRYPOINT allows you to configure a container that will run as an executable.
-##
-## This is the default ENTRYPOINT and will be augmented and used by downstream
-## containers.
-##
-## To use downstream change the configuration in `/etc/entrypoint.conf` and
-## put the container script in `/etc/entrypoint.d`. This script just calls all
-## of the scripts (note: must be '.sh' files) loaded into `/etc/entrypoint.d`.
-
-echo "---------- [ ENTRYPOINT: Alpine($(version)-$(whoami)) ] ----------"
-run-parts -a "$@" --exit-on-error /etc/entrypoint.d
-# export ENV="/etc/profile"
-# if [ -z "$@" ] ; then
-#  # No parameters so do not pass to part
-#  run-parts --exit-on-error /etc/entrypoint.d
-# else
 #
-# fi
-
-if [ $? -eq 0 ]; then
- if [ "default" != "$1" ] ; then
-  exec $@
- fi
-else
- echo "[ERROR]: An entrypint script in /etc/entrypoint.d failed."
-fi
-
-
-# https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
-# https://ostechnix.com/how-to-run-all-scripts-in-a-directory-in-linux/
-
-# exec $@
+# [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint)
+# An ENTRYPOINT allows you to configure a container that will run as an executable.
+#
+# This is the default ENTRYPOINT and will be augmented and used by downstream
+# containers.
+#
+# This is the default entrypoint script for this and all downstream containers.
+# This script just calls all of the scripts (note: should be shell scripts) that
+# are in `/etc/entrypoint.d`. These script initialize and run the container services
+# and the container process.  Scripts loaded should:
+# - return a != 0 if a forground process is called to stop subsequent scripts being called.
+# - Services should check to make sure they are not already running.
+#
+# The last script(99-) executes whatever the container parameters provided from the command line.
+# The default container process is crond.  If the entrypoint gets to the last script and there
+# has not been priovided with executable parameters, then crond will be re-launched in the forground to
+# keep the container up and running.
+#
+#
+echo "---------- [ ENTRYPOINT: Alpine($(version)-$(whoami)) ] ----------"
+export ENTRYPOINT_PARAMS="$@"
+run-parts --exit-on-error /etc/entrypoint.d
 
 
 

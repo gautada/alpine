@@ -1,31 +1,27 @@
 #!/bin/ash
-
-# source /etc/entrypoint.conf
-# Luanch the ssh bastion and podman API Service.
-
-# /usr/bin/sudo /usr/bin/ssh-keygen -A -f /opt/bastion/
-
+#
+# Default base level container services"
+# - Bastion(daemon) - sshd, ansible
+# - Scheduler(daemon) - crond
+#
+# Launch the bastion container service (always in daemon/background)
 # Check if bastion folder is provided and the server key folder is provided
-# if [ -d /opt/bastion/ssh ] ; then
- # /bin/chown -R "$(/usr/bin/whoami)":"$(/usr/bin/whoami)" /opt/bastion/ssh
- # /bin/chmod 0700 /opt/bastion/ssh
- # /bin/chown $USER:USER /opt/bastion/ssh/authorized_keys
- # /bin/chmod 0600 /opt/bastion/ssh/authorized_keys
-# fi
 if [ -d /opt/bastion/etc/ssh ] ; then
  if [ -f "/opt/bastion/ssh/authorized_keys" ] ; then
-  echo "---------- [ BASTION(sshd) ] ----------"
-  /usr/bin/sudo /usr/sbin/sshd -e -E /var/log/bastion.log -f /etc/ssh/sshd_config
+  # Make sure another sshd is not already running
+  TEST="$(/usr/bin/pgrep sshd)"
+  if [ $? -eq 1 ] ; then
+   echo "---------- [ BASTION(sshd) ] ----------"
+   /usr/bin/sudo /usr/sbin/sshd -e -E /var/log/bastion.log -f /etc/ssh/sshd_config
+  fi
+  unset TEST
  fi
 fi
-# https://stackoverflow.com/questions/68625039/ssh-authorized-keys-file-location-and-permissions
-
-## Launch the cron service. By default this is in the daemon(background) mode unless defined in
-## `/etc/entrypoint.conf`. If CMD parameters are defined then force cron to run in background
-## to allow for the CMD to be executed.
-if [ "default" == "$1" ] ; then
-  /usr/bin/sudo /usr/sbin/crond -f -l 0
-else
+# Scheduler should always launch in the background (it will get corrected later (99) if it gets that far)
+TEST="$(/usr/bin/pgrep sshd)"
+if [ $? -eq 1 ] ; then
  echo "---------- [ SCHEDULER(crond) ] ----------"
-  /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /var/log/scheduler.log
+ /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /var/log/scheduler.log
 fi
+unset TEST
+

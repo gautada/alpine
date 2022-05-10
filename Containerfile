@@ -27,6 +27,8 @@ COPY 00-profile.sh /etc/profile.d/00-profile.sh
 
 COPY entrypoint /entrypoint
 COPY 00-entrypoint.sh /etc/entrypoint.d/00-entrypoint.sh
+COPY 10-entrypoint.sh /etc/entrypoint.d/10-entrypoint.sh
+COPY 99-entrypoint.sh /etc/entrypoint.d/99-entrypoint.sh
 ENTRYPOINT ["/entrypoint"]
 
 COPY bastion-setup /usr/bin/bastion-setup
@@ -42,11 +44,11 @@ RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
  && /bin/echo "" >> /etc/ssh/sshd_config \
  && /bin/echo "" >> /etc/ssh/sshd_config \
  && /bin/sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config \
- && /bin/echo "AuthorizedKeysFile    /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config \
+ && /bin/echo "AuthorizedKeysFile       /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config \
  && /bin/sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config \
- && /bin/echo "HostKey    /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
- && /bin/echo "HostKey    /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
- && /bin/echo "HostKey    /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
+ && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
+ && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
+ && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
  && /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
  && /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 

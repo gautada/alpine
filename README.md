@@ -18,11 +18,26 @@ docker build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revi
 
 ### Run
 
-This container is not ment to be the directly run.  Generally, it should be used within a downstream container.
+All containers are ment to be run in `--detatch` mode.
+```
+docker run --detach --interactive --name alpine -p 22:2222 --rm --tty --volume ~/Workspace/alpine/bastion:/opt/bastion alpine:dev
+```
+
+To interact with the container
+```
+docker exec --interactive --tty alpine /bin/ash
+```
+
+### Deploy
 
 ```
-docker run --interactive --name alpine --port 22:2222 --rm --tty --volume ~/Workspace/alpine/bastion:/opt/bastion alpine:dev /bin/ash
+docker tag alpine:dev docker.io/gautada/alpine:3.15.4
+docker login --username=gautada docker.io
+docker push docker.io/gautada/alpine:3.15.4
 ```
+
+
+
 
 ### Container Configuration
 
@@ -65,7 +80,7 @@ When running local setup access via the `--port 22:2222` mapping and the ssh key
 For security bastion cannot run out-of-the box, you must create the server keys and the authorized_keys file.  These keys are provided via the bastion folder/volume from the host so once created they should work from each reboot.  Running locally the **first run** of the container must be restarted after setup to get the bastion service started or use a generic alpine container to create the bastion folder/volume before first run.
 
 ```
-docker exec --interactive --tty alpine /usr/bin/bastion-setup
+docker exec --interactive --tty --user root alpine /usr/bin/bastion-setup
 ```
 
 Gnerally, containers use only one **USER**.  Therefore, the generic `/opt/bastion/ssh` folder that contains the `authorized_keys` file should be owned and constrained for the single **USER**.
