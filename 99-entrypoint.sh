@@ -5,6 +5,7 @@ echo "... [$0] ..."
 
 RETURN_VALUE=0
 if [ ! -z "$ENTRYPOINT_PARAMS" ] ; then
+ echo "---------- [ CONTAINER RUN($ENTRYPOINT_PARAMS) ] ----------"
  exec $ENTRYPOINT_PARAMS
  RETURN_VALUE $?
 else
