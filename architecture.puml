@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' Person(alias, label, ?descr, ?sprite, ?tags, $link)
+' Component(alias, label, ?techn, ?descr, ?sprite, ?tags, $link)
+' ComponentDb
+' ComponentQueue
+' Component_Ext
+' ComponentDb_Ext
+' ComponentQueue_Ext
+
+Person(user, "Client")
+Component(folder1, "Folder", "SSH Keys")
+System_Boundary(container, "Container", "Alpine Linux") {
+ Component(bastion, "Bastion")
+ Component(folder2, "Folder", "SSH Keys")
+ Component(process, "Container Process")
+ Component(services, "Container Services")
+}
+
+Rel(user, bastion, "Secure Access", "ssh[22;2222]")
+Rel(bastion, process, "Proxy Admin")
+Rel(bastion, services, "Proxy Admin")
+Rel(folder1, folder2, "Shared", "volume")
+Rel(folder2, bastion, "Configures Access")
+@enduml
