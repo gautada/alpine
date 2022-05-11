@@ -59,6 +59,10 @@ This the operating system container defines two version [aliases](https://linuxh
 - **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
 - **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
 
+#### Entrypoint
+
+This container provides the `/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The `/entrypoint` script call the subsequent scripts in the `/etc/entrypoint.d` folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`.
+
 #### Timezone
 
 Set the timezone to US/New York a.k.a US/Eastern.  This provides consistency across containers.
@@ -84,11 +88,3 @@ docker exec --interactive --tty --user root alpine /usr/bin/bastion-setup
 ```
 
 Gnerally, containers use only one **USER**.  Therefore, the generic `/opt/bastion/ssh` folder that contains the `authorized_keys` file should be owned and constrained for the single **USER**.
-
-To setup the `authorized_key` run 'http://www.linuxproblem.org/art_9.html':
-
-```
-docker exec --interactive --tty alpine ssh-keygen -t rsa
-``` 
-
-

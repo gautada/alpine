@@ -10,7 +10,7 @@ EXPOSE 22/tcp
 
 ENV ENV="/etc/profile"
 
-RUN /sbin/apk add --no-cache nano openssh sudo shadow tzdata
+RUN /sbin/apk add --no-cache git nano openssh sudo shadow tzdata
 RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN /bin/echo "America/New_York" > /etc/timezone
 
@@ -51,8 +51,6 @@ RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
  && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
  && /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
  && /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
-
-
 
 ARG USER=ansible
 RUN /bin/mkdir -p /opt/$USER \
