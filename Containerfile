@@ -10,7 +10,7 @@ EXPOSE 22/tcp
 
 ENV ENV="/etc/profile"
 
-RUN /sbin/apk add --no-cache nano openssh sudo shadow tzdata
+RUN /sbin/apk add --no-cache git nano openssh sudo shadow tzdata
 RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN /bin/echo "America/New_York" > /etc/timezone
 
