@@ -15,9 +15,9 @@ steps:
 - name: publish
   environment:
     DOCKERIO_USERNAME:
-      from_secret: username.docker.io
+      from_secret: username_docker_io
     DOCKERIO_PASSWORD:
-      from_secret: password.docker.io
+      from_secret: password_docker_io
   commands:
    - podman tag alpine:build docker.io/gautada/alpine:3.15.4
    - podman login --username$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
