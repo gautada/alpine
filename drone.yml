@@ -20,6 +20,6 @@ steps:
       from_secret: password_docker_io
   commands:
    - podman tag alpine:build docker.io/gautada/alpine:3.15.4
-   - podman login --username$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+   - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
    - podman push docker.io/gautada/alpine:3.15.4
   
