@@ -2,12 +2,17 @@ kind: pipeline
 type: exec
 name: Container Build - Alpine
 
+platform:
+  os: linux
+  arch: amd64
+  
 steps:
 - name: build
   environment:
     ALPINE_TAG: 3.15.4
   commands:
-  - podman build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
+  - ls -l
+#   - podman build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
 
 - name: publish
   environment:
