@@ -1,0 +1,56 @@
+kind: pipeline
+type: exec
+name: Container Build - Alpine
+
+steps:
+- name: build
+  environment:
+    ALPINE_TAG: 3.15.4
+  commands:
+  - podman build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
+
+- name: publish
+  environment:
+    DOCKERIO_USERNAME:
+      from_secret: username.docker.io
+    DOCKERIO_PASSWORD:
+      from_secret: password.docker.io
+  commands:
+  - podman tag alpine:build docker.io/gautada/alpine:3.15.4
+  - podman login --username$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+  - podman push docker.io/gautada/drone:$SERVER_BRANCH
+  - podman --remote --connection arm manifest create drone:man
+  - podman --remote --connection arm manifest add drone:man docker.io/gautada/drone:arm-$SERVER_BRANCH
+  - podman --remote --connection arm manifest add drone:man docker.io/gautada/drone:x86-$SERVER_BRANCH
+  - podman --remote --connection arm tag drone:man docker.io/gautada/drone:$SERVER_BRANCH
+  - podman --remote --connection arm login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+  - podman --remote --connection arm push docker.io/gautada/drone:$SERVER_BRANCH
+  
+- name: clean
+  image: docker.io/gautada/builder:arm-3.2.3-r1
+  privileged: true
+  environment:
+    DOCKERIO_USERNAME:
+      from_secret: username.docker.io
+    DOCKERIO_PASSWORD:
+      from_secret: password.docker.io
+    PODMAN_KEY:
+      from_secret: podman.key
+    PODMAN_CERT:
+      from_secret: podman.cert
+    SERVER_BRANCH: v2.3.1
+  commands:
+  - /builder-base 5
+  - podman --remote --connection arm rmi drone:man
+  - podman --remote --connection arm rmi docker.io/gautada/drone:arm-$SERVER_BRANCH
+  - podman --remote --connection x86 rmi drone:dev
+  - podman --remote --connection x86 rmi docker.io/gautada/drone:x86-$SERVER_BRANCH
+  - podman --remote --connection arm rmi drone:man
+  - podman --remote --connection x86 rmi docker.io/gautada/drone:$SERVER_BRANCH
+
+trigger:
+  branch:
+  - main
+
+
+
