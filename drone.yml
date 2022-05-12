@@ -1,14 +1,25 @@
----
 kind: pipeline
 type: exec
-name: default
+name: Container Build - Alpine
 
 platform:
   os: linux
   arch: arm64
 
 steps:
-- name: greeting
+- name: build
+  environment:
+    ALPINE_TAG: 3.15.4
   commands:
-  - echo hello world
+  - podman build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
+- name: publish
+  environment:
+    DOCKERIO_USERNAME:
+      from_secret: username.docker.io
+    DOCKERIO_PASSWORD:
+      from_secret: password.docker.io
+  commands:
+   - podman tag alpine:build docker.io/gautada/alpine:3.15.4
+   - podman login --username$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+   - podman push docker.io/gautada/alpine:3.15.4
   
