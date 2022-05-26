@@ -36,7 +36,14 @@ docker login --username=gautada docker.io
 docker push docker.io/gautada/alpine:3.15.4
 ```
 
+### Bastion Server
 
+Bastion is the access to the container. To setup the bastion server, i.e. the ssh server
+
+
+```
+docker exec --user root /usr/bin/ssh-keygen
+```
 
 
 ### Container Configuration

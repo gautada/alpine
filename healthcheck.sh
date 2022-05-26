@@ -1,0 +1,40 @@
+#!/bin/ash
+#
+# Author: Adam Gautier <adam@gautier.org>
+# Abstract: This script check some system information to determine
+# the health of a running container.
+# Specification:
+# - Container postgres
+# - Checks - Disk usage, crond running
+# - Todo - Check server is available for client connection
+#
+# Container: Healthcheck Script
+#
+# The HEALTHCHECK instruction tells container manager how to
+# test a container to check that it is still working. This can
+# detect cases such as a web server that is stuck in an
+# infinite loop and unable to handle new connections, even
+# though the server process is still running.
+#
+# When a container has a healthcheck specified, it has a
+# health status in addition to its normal status. This status
+# is initially starting. Whenever a health check passes, it
+# becomes healthy (whatever state it was previously in). After
+# a certain number of consecutive failures, it becomes
+# unhealthy.
+#
+# The command’s exit status indicates the health status of the container. The possible values are:
+#
+# - 0: success - the container is healthy and ready for use
+# - 1: unhealthy - the container is not working correctly
+# - 2: reserved - do not use this exit code
+
+HEALTH=0
+
+run-parts --exit-on-error /etc/healthcheck.d/active
+if [ ! $? -eq 0 ] ; then
+ HEALTH=1
+fi
+
+return $HEALTH
+
