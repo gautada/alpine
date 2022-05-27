@@ -20,7 +20,7 @@ docker build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revi
 
 All containers are ment to be run in `--detatch` mode.
 ```
-docker run --detach --interactive --name alpine -p 22:2222 --rm --tty --volume ~/Workspace/alpine/bastion:/opt/bastion alpine:dev
+docker run --detach --interactive --name alpine -p 2222:22 --rm --tty --volume ~/Workspace/alpine/bastion-container:/opt/bastion alpine:dev
 ```
 
 To interact with the container
