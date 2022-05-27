@@ -6,4 +6,5 @@
 # huigher numbered entrypoint scripts.
 #
 # DOWNSTREAM CONTAINERS SHOULD OVERWRITE THIS SCRIPT
+# echo "... [$0] ..."
 return 0

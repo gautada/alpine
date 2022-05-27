@@ -40,6 +40,18 @@ docker push docker.io/gautada/alpine:3.15.4
 
 Bastion is the access to the container. To setup the bastion server, i.e. the ssh server
 
+### Services
+- Environments 
+ - Profile
+- Timezones
+- Sudo
+- Versioning
+- Healthcheck
+- Entrypoint
+- Bastion
+- Scheduler
+
+
 
 ```
 docker exec --user root /usr/bin/ssh-keygen

@@ -16,11 +16,6 @@ LABEL maintainer="Adam Gautier <adam@gautier.org>"
 LABEL description="Based container as a basic Alpine Linux distribution for use as the core for other containers."
 
 # ╭――――――――――――――――――――╮
-# │ PORTS              │
-# ╰――――――――――――――――――――╯
-EXPOSE 22/tcp
-
-# ╭――――――――――――――――――――╮
 # │ ENVIRONMENT        │
 # ╰――――――――――――――――――――╯
 ENV ENV="/etc/profile"
@@ -52,23 +47,24 @@ COPY 00-profile.sh /etc/profile.d/00-profile.sh
 # │ HEALTHCHECK        │
 # ╰――――――――――――――――――――╯
 COPY healthcheck /healthcheck
-COPY hc_bastion.sh /etc/healthcheck.d/deactive/hc_bastion.sh
-COPY hc_crond.sh /etc/healthcheck.d/active/hc_crond.sh
+COPY hc-bastion.sh /etc/healthcheck.d/hc-bastion.sh
+COPY hc-crond.sh /etc/healthcheck.d/active/hc-crond.sh
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
 COPY entrypoint /entrypoint
-COPY 00-bastion-ep.sh /etc/entrypoint.d/00-bastion-ep.sh
-COPY 01-crond-ep.sh /etc/entrypoint.d/01-crond-ep.sh
-COPY 10-container-ep.sh /etc/entrypoint.d/10-container-ep.sh
-COPY 99-exec-ep.sh /etc/entrypoint.d/99-exec-ep.sh
+COPY 00-ep-bastion.sh /etc/entrypoint.d/00-ep-bastion.sh
+COPY 01-ep-crond.sh /etc/entrypoint.d/01-ep-crond.sh
+COPY 10-ep-container.sh /etc/entrypoint.d/10-ep-container.sh
+COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
 ENTRYPOINT ["/entrypoint"]
 
 # ╭――――――――――――――――――――╮
-# │ HEALTHCHECK        │
+# │ BASTION            │
 # ╰――――――――――――――――――――╯
+EXPOSE 22/tcp
 VOLUME /opt/bastion
 COPY bastion-setup /usr/bin/bastion-setup
 # AuthorizedKeysFile - Specifies the file that contains the public keys used for user authentication. Default is changed to /opt/bastion/ssh/authorized_keys
@@ -100,5 +96,9 @@ RUN /bin/mkdir -p /opt/$USER \
  && /usr/sbin/usermod -aG wheel $USER \
  && /bin/echo "$USER:$USER" | chpasswd \
  && /bin/chown $USER:$USER -R /opt/$USER
-USER $USER
-WORKDIR /home/$USER
+
+# ╭――――――――――――――――――――╮
+# │ WORKING DIR        │
+# ╰――――――――――――――――――――╯
+USER root
+WORKDIR /
