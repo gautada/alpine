@@ -11,10 +11,12 @@ if [ ! -z "$ENTRYPOINT_PARAMS" ] ; then
 else
  # Kill the background crond and restart with the forground service.  Crond is the default
  # container process.
- TEST="$(/usr/bin/pgrep crond)"
+ TEST="$(/usr/bin/pgrep /usr/sbin/crond)"
+ echo $TEST
+ TEST="$(/usr/bin/pgrep /usr/sbin/crond)"
  if [ $? -eq 0 ] ; then
   # Kill the background cron service
-  killall "$(/usr/bin/pgrep crond)"
+  killall crond
  fi
  echo "---------- [ SCHEDULER(*crond) ] ----------"
  /usr/bin/sudo /usr/sbin/crond -f -l 0
