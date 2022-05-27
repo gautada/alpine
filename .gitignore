@@ -11,3 +11,5 @@
 # Ignore and container runtime folders
 **-container/
 
+# .dockerignore can simply be a symlink -- need to lookup podman ignore
+.dockerignore
