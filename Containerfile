@@ -73,20 +73,20 @@ COPY bastion-setup /usr/bin/bastion-setup
 # HostKey Specifies a file containing a private host key used by SSH. The defaults are /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key and /etc/ssh/ssh_host_rsa_key
 # PermitRootLogin no
 # PasswordAuthentication no
-RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config \
- && /bin/echo "AuthorizedKeysFile       /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config \
- && /bin/sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config \
- && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
- && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
- && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
- && /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
- && /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~
+RUN /bin/echo "" >> /etc/ssh/sshd_config 
+RUN /bin/echo "" >> /etc/ssh/sshd_config
+RUN /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config
+RUN /bin/echo "" >> /etc/ssh/sshd_config
+RUN /bin/echo "" >> /etc/ssh/sshd_config
+RUN /bin/sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config
+RUN /bin/echo "AuthorizedKeysFile       /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config
+RUN /bin/sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config
+RUN /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config
+RUN /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config
+RUN /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config
+RUN /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+RUN /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
 # ╭――――――――――――――――――――╮
 # │ USER               │
