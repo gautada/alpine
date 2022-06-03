@@ -66,11 +66,14 @@ ENTRYPOINT ["/entrypoint"]
 # ╭――――――――――――――――――――╮
 # │ BASTION            │
 # ╰――――――――――――――――――――╯
-EXPOSE 22/tcp
-VOLUME /opt/bastion
-COPY bastion-setup /usr/bin/bastion-setup
-
-# RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~
+# EXPOSE 22/tcp
+# VOLUME /opt/bastion
+# COPY bastion-setup /usr/bin/bastion-setup
+# AuthorizedKeysFile - Specifies the file that contains the public keys used for user authentication. Default is changed to /opt/bastion/ssh/authorized_keys
+# HostKey Specifies a file containing a private host key used by SSH. The defaults are /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key and /etc/ssh/ssh_host_rsa_key
+# PermitRootLogin no
+# PasswordAuthentication no
+RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~
 RUN /bin/echo "" >> /etc/ssh/sshd_config
 RUN /bin/echo "" >> /etc/ssh/sshd_config
 RUN /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config
