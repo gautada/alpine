@@ -16,7 +16,7 @@ else
  TEST="$(/usr/bin/pgrep /usr/sbin/crond)"
  if [ $? -eq 0 ] ; then
   # Kill the background cron service
-  killall crond
+  /usr/bin/sudo /usr/bin/killall /usr/sbin/crond
  fi
  echo "---------- [ SCHEDULER(*crond) ] ----------"
  /usr/bin/sudo /usr/sbin/crond -f -l 0

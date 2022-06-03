@@ -14,7 +14,7 @@ A very simple container that uses [Alpine Linux](https://alpinelinux.org).  This
 ### Build
 
 ```
-docker build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:dev .
+docker build --build-arg ALPINE_VERSION=3.16.0 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:dev .
 ``` 
 
 ### Run

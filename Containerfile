@@ -23,7 +23,7 @@ ENV ENV="/etc/profile"
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache curl git iputils nano openssh sudo shadow tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap openssh sudo shadow tzdata wget
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
@@ -35,7 +35,9 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
 RUN /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
- && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
+ && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers \
+ && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/killall /usr/sbin/crond" >> /etc/sudoers
+   
 
 # ╭――――――――――――――――――――╮
 # │ VERSIONING         │
@@ -48,7 +50,7 @@ COPY 00-profile.sh /etc/profile.d/00-profile.sh
 # ╰――――――――――――――――――――╯
 COPY healthcheck /healthcheck
 COPY hc-bastion.sh /etc/healthcheck.d/hc-bastion.sh
-COPY hc-crond.sh /etc/healthcheck.d/active/hc-crond.sh
+COPY hc-crond.sh /etc/healthcheck.d/hc-crond.sh
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮

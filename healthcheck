@@ -31,7 +31,7 @@
 
 HEALTH=0
 
-run-parts --exit-on-error /etc/healthcheck.d/active
+run-parts --exit-on-error /etc/healthcheck.d/
 if [ ! $? -eq 0 ] ; then
  HEALTH=1
 fi
