@@ -42,7 +42,6 @@ RUN /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sud
  && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers \
  && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/killall /usr/sbin/crond" >> /etc/sudoers
    
-
 # ╭――――――――――――――――――――╮
 # │ VERSIONING         │
 # ╰――――――――――――――――――――╯
@@ -90,7 +89,7 @@ RUN /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 RUN /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 EXPOSE 22/tcp
 VOLUME /opt/bastion
-COPY bastion-setup /usr/bin/bastion-setup
+
 
 # ╭――――――――――――――――――――╮
 # │ USER               │
@@ -108,3 +107,5 @@ RUN /bin/mkdir -p /opt/$USER \
 # ╰――――――――――――――――――――╯
 USER root
 WORKDIR /
+
+COPY bastion-setup /usr/bin/bastion-setup
