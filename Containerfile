@@ -70,7 +70,7 @@ EXPOSE 22/tcp
 VOLUME /opt/bastion
 COPY bastion-setup /usr/bin/bastion-setup
 
-RUN cp /etc/ssh/sshd_config /etc/ssh/sshd_config~
+# RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~
 RUN /bin/echo "" >> /etc/ssh/sshd_config
 RUN /bin/echo "" >> /etc/ssh/sshd_config
 RUN /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config
