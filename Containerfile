@@ -72,8 +72,8 @@ ENTRYPOINT ["/entrypoint"]
 EXPOSE 22/tcp
 VOLUME /opt/bastion
 COPY bastion-setup /usr/bin/bastion-setup
-COPY bastion.conf /etc/ssh/sshd_conf.d/bastion.conf
-RUN /bin/cat /etc/ssh/sshd_conf.d/bastion.conf >> /etc/ssh/sshd_config
+COPY bastion.conf /etc/ssh/bastion.conf
+RUN /bin/cat /etc/ssh/bastion.conf >> /etc/ssh/sshd_config
 
 # ╭――――――――――――――――――――╮
 # │ USER               │
