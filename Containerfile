@@ -69,27 +69,11 @@ ENTRYPOINT ["/entrypoint"]
 # ╭――――――――――――――――――――╮
 # │ BASTION            │
 # ╰――――――――――――――――――――╯
-# AuthorizedKeysFile - Specifies the file that contains the public keys used for user authentication. Default is changed to /opt/bastion/ssh/authorized_keys
-# HostKey Specifies a file containing a private host key used by SSH. The defaults are /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key and /etc/ssh/ssh_host_rsa_key
-# PermitRootLogin no
-# PasswordAuthentication no
-RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~
-RUN /bin/echo "" >> /etc/ssh/sshd_config
-RUN /bin/echo "" >> /etc/ssh/sshd_config
-RUN /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config
-RUN /bin/echo "" >> /etc/ssh/sshd_config
-RUN /bin/echo "" >> /etc/ssh/sshd_config
-RUN /bin/sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config
-RUN /bin/echo "AuthorizedKeysFile       /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config
-RUN /bin/sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config
-RUN /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config
-RUN /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config
-RUN /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config
-RUN /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config
-RUN /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 EXPOSE 22/tcp
 VOLUME /opt/bastion
-
+COPY bastion-setup /usr/bin/bastion-setup
+COPY bastion.conf /etc/ssh/sshd_conf.d/bastion.conf
+RUN /bin/cat /etc/ssh/sshd_conf.d/bastion.conf >> /etc/ssh/sshd_config
 
 # ╭――――――――――――――――――――╮
 # │ USER               │
@@ -108,4 +92,4 @@ RUN /bin/mkdir -p /opt/$USER \
 USER root
 WORKDIR /
 
-COPY bastion-setup /usr/bin/bastion-setup
+
