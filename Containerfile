@@ -56,7 +56,9 @@ HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /hea
 # ╰――――――――――――――――――――╯
 COPY entrypoint /entrypoint
 COPY 00-ep-crond.sh /etc/entrypoint.d/00-ep-crond.sh
+COPY 10-ep-container.sh /etc/entrypoint.d/10-ep-container.sh
 COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
+COPY exitpoint /exitpoint
 ENTRYPOINT ["/entrypoint"]
 
 

@@ -17,28 +17,9 @@ A very simple container that uses [Alpine Linux](https://alpinelinux.org).  This
 docker build --build-arg ALPINE_VERSION=3.16.0 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:dev .
 ``` 
 
-## Bastion
-pkg: openssh
-%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd
-# ╭――――――――――――――――――――╮
-# │ BASTION            │
-# ╰――――――――――――――――――――╯
-EXPOSE 22/tcp
-VOLUME /opt/bastion
-COPY bastion-setup /usr/bin/bastion-setup
-COPY bastion.conf /etc/ssh/bastion.conf
-RUN /bin/cat /etc/ssh/bastion.conf >> /etc/ssh/sshd_config
 
-# ╭――――――――――――――――――――╮
-# │ USER               │
-# ╰――――――――――――――――――――╯
-ARG USER=bastion
-RUN /bin/mkdir -p /opt/$USER \
- && /usr/sbin/addgroup $USER \
- && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
- && /usr/sbin/usermod -aG wheel $USER \
- && /bin/echo "$USER:$USER" | chpasswd \
- && /bin/chown $USER:$USER -R /opt/$USER
+
+
 
 
 ### Run

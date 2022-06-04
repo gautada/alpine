@@ -29,10 +29,12 @@ done
 unset script
 
 echo "---------- [ ENTRYPOINT: Alpine($(osversion)-$(whoami)) ] ----------"
-# if [ -z "$ENTRYPOINT_PARAMS" ] ; then
 run-parts --exit-on-error /etc/entrypoint.d
-# else
-#  run-parts /etc/entrypoint.d # Fail safe, don't error on entrypoint.d
-# fi
+EXIT=$?
+if [ $? -eq 0 ] ; then
+ /exitpoint
+else
+ echo "Entrypoint errored($EXIT) could not close cleanly"
+fi
 
 
