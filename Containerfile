@@ -52,18 +52,14 @@ COPY 00-profile.sh /etc/profile.d/00-profile.sh
 # │ HEALTHCHECK        │
 # ╰――――――――――――――――――――╯
 COPY healthcheck /healthcheck
-COPY hc-bastion.sh /etc/healthcheck.d/hc-bastion.sh
-COPY hc-crond.sh /etc/healthcheck.d/hc-crond.sh
+COPY hc-*.sh /etc/healthcheck.d/
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
 COPY entrypoint /entrypoint
-COPY 00-ep-bastion.sh /etc/entrypoint.d/00-ep-bastion.sh
-COPY 01-ep-crond.sh /etc/entrypoint.d/01-ep-crond.sh
-COPY 10-ep-container.sh /etc/entrypoint.d/10-ep-container.sh
-COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
+COPY *-ep-*.sh /etc/entrypoint.d/
 ENTRYPOINT ["/entrypoint"]
 
 # ╭――――――――――――――――――――╮
