@@ -25,7 +25,7 @@ WORKDIR /
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap openssh sudo shadow tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap sudo shadow tzdata wget
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
@@ -36,7 +36,7 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # ╭――――――――――――――――――――╮
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
-COPY wheel-alpine.sudoers /etc/sudoers.d/wheel-alpine.sudoers
+COPY wheel-crond.sudoers /etc/sudoers.d/wheel-alpine.sudoers
 
 # ╭――――――――――――――――――――╮
 # │ VERSIONING         │
@@ -48,33 +48,15 @@ COPY 00-profile.sh /etc/profile.d/00-profile.sh
 # │ HEALTHCHECK        │
 # ╰――――――――――――――――――――╯
 COPY healthcheck /healthcheck
-COPY hc-*.sh /etc/healthcheck.d/
+COPY hc-crond.sh /etc/healthcheck.d/hc-crond.sh
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
 COPY entrypoint /entrypoint
-COPY *-ep-*.sh /etc/entrypoint.d/
+COPY 00-ep-crond.sh /etc/entrypoint.d/00-ep-crond.sh
+COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
 ENTRYPOINT ["/entrypoint"]
 
-# ╭――――――――――――――――――――╮
-# │ BASTION            │
-# ╰――――――――――――――――――――╯
-EXPOSE 22/tcp
-VOLUME /opt/bastion
-COPY bastion-setup /usr/bin/bastion-setup
-COPY bastion.conf /etc/ssh/bastion.conf
-RUN /bin/cat /etc/ssh/bastion.conf >> /etc/ssh/sshd_config
-
-# ╭――――――――――――――――――――╮
-# │ USER               │
-# ╰――――――――――――――――――――╯
-ARG USER=bastion
-RUN /bin/mkdir -p /opt/$USER \
- && /usr/sbin/addgroup $USER \
- && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
- && /usr/sbin/usermod -aG wheel $USER \
- && /bin/echo "$USER:$USER" | chpasswd \
- && /bin/chown $USER:$USER -R /opt/$USER
 
