@@ -19,10 +19,8 @@ LABEL description="Based container as a basic Alpine Linux distribution for use 
 # │ ENVIRONMENT        │
 # ╰――――――――――――――――――――╯
 ENV ENV="/etc/profile"
-
-# ╭――――――――――――――――――――╮
-# │ PORTS              │
-# ╰――――――――――――――――――――╯
+USER root
+WORKDIR /
 
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
@@ -38,10 +36,8 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # ╭――――――――――――――――――――╮
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
-RUN /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
- && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers \
- && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/bin/killall /usr/sbin/crond" >> /etc/sudoers
-   
+COPY wheel-alpine.sudoers /etc/sudoers.d/wheel-alpine.sudoers
+
 # ╭――――――――――――――――――――╮
 # │ VERSIONING         │
 # ╰――――――――――――――――――――╯
@@ -81,11 +77,4 @@ RUN /bin/mkdir -p /opt/$USER \
  && /usr/sbin/usermod -aG wheel $USER \
  && /bin/echo "$USER:$USER" | chpasswd \
  && /bin/chown $USER:$USER -R /opt/$USER
-
-# ╭――――――――――――――――――――╮
-# │ WORKING DIR        │
-# ╰――――――――――――――――――――╯
-USER root
-WORKDIR /
-
 
