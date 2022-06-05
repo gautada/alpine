@@ -6,10 +6,16 @@
 RETURN_VALUE=0
 if [ ! -z "$ENTRYPOINT_PARAMS" ] ; then
  echo "---------- [ EXEC($ENTRYPOINT_PARAMS) ] ----------"
+ for script in /etc/profile.d/*.sh ; do
+  if [ -r "$script" ] ; then
+   . "$script"
+  fi
+ done
+ unset script
  exec $ENTRYPOINT_PARAMS
  RETURN_VALUE $?
 else
-  echo "---------- [ N/A ] ----------"
+  echo "---------- ENTRYPOINT [ N/A ] ----------"
  # Kill the background crond and restart with the forground service.  Crond is the default
  # container process.
  # TEST="$(/usr/bin/pgrep /usr/sbin/crond)"

@@ -19,6 +19,8 @@ LABEL description="Based container as a basic Alpine Linux distribution for use 
 # │ ENVIRONMENT        │
 # ╰――――――――――――――――――――╯
 ENV ENV="/etc/profile"
+COPY version /bin/version
+COPY 00-profile.sh /etc/profile.d/00-profile.sh
 USER root
 WORKDIR /
 
@@ -37,12 +39,6 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
 COPY wheel-crond /etc/sudoers.d/wheel-crond
-
-# ╭――――――――――――――――――――╮
-# │ VERSIONING         │
-# ╰――――――――――――――――――――╯
-COPY version /bin/version
-COPY 00-profile.sh /etc/profile.d/00-profile.sh
 
 # ╭――――――――――――――――――――╮
 # │ HEALTHCHECK        │

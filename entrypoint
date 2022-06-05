@@ -21,13 +21,6 @@
 #
 export ENTRYPOINT_PARAMS="$@"
 
-for script in /etc/profile.d/*.sh ; do
-    if [ -r "$script" ] ; then
-        . "$script"
-    fi
-done
-unset script
-
 echo "---------- [ ENTRYPOINT: Alpine($(osversion)-$(whoami)) ] ----------"
 run-parts --exit-on-error /etc/entrypoint.d
 EXIT=$?
