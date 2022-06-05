@@ -36,7 +36,7 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # ╭――――――――――――――――――――╮
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
-COPY wheel-crond.sudoers /etc/sudoers.d/wheel-alpine.sudoers
+COPY wheel-crond /etc/sudoers.d/wheel-crond
 
 # ╭――――――――――――――――――――╮
 # │ VERSIONING         │
