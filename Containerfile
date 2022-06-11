@@ -27,7 +27,8 @@ WORKDIR /
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap sudo shadow tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap nmap-ncat gpg sudo shadow tzdata wget
+RUN /sbin/apk add --no-cache python3
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
@@ -39,6 +40,7 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
 COPY wheel-crond /etc/sudoers.d/wheel-crond
+COPY wheel-nmap /etc/sudoers.d/wheel-nmap
 
 # ╭――――――――――――――――――――╮
 # │ HEALTHCHECK        │

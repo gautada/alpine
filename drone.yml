@@ -23,4 +23,3 @@ steps:
    - podman tag alpine:build docker.io/$DOCKERIO_USERNAME/alpine:$ALPINE_VERSION
    - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
    - podman push docker.io/$DOCKERIO_USERNAME/alpine:$ALPINE_VERSION
-  
