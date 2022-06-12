@@ -1,0 +1,5 @@
+#!/bin/ash
+echo "Container backup stub - overload in other containers"
+
+# Confirm that backup directory is available
+# Execute backup (get data, compress(bzip2), encrypt(gpg))

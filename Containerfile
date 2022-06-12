@@ -27,7 +27,7 @@ WORKDIR /
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap nmap-ncat gpg sudo shadow tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap nmap-ncat gpg shadow sudo tzdata wget
 RUN /sbin/apk add --no-cache python3
 
 # ╭――――――――――――――――――――╮
