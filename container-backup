@@ -1,5 +1,74 @@
-#!/bin/ash
-echo "Container backup stub - overload in other containers"
+#!/bin/sh
 
-# Confirm that backup directory is available
-# Execute backup (get data, compress(bzip2), encrypt(gpg))
+FOLDER_BACKUP="/Users/mada/backup"
+FOLDER_WORKING="$FOLDER_BACKUP/working"
+FOLDER_DAILY="$FOLDER_WORKING/daily"
+FOLDER_HOURLY="$FOLDER_WORKING/hourly"
+FOLDER_BACKUPS="$FOLDER_BACKUP/backups"
+FILE_DAILY="$FOLDER_WORKING/daily-container-backup.tar.bz2"
+BACKUP_TAG="$(date +%H)"
+
+container_backup() {
+ pwd
+ echo "[ WARN] This function should be overloaded by the container"
+ date > alpine-backup.txt
+ FOLDER=$(date +%s)
+ mkdir $FOLDER
+ date > $FOLDER/another-backup.txt
+}
+
+container_backup_control() {
+ FOLDER_TARGET=$FOLDER_WORKING/$1
+ if [ ! -d $FOLDER_TARGET ] ; then
+  echo "[DEBUG] Working folder($FOLDER_TARGET) does not exist."
+  mkdir -p $FOLDER_TARGET
+ else
+  # echo "$FOLDER_TARGET"
+  rm -rf $FOLDER_TARGET/* $FOLDER_TARGET/.*.sha256
+  # ls -l "$FOLDER_TARGET"
+  cd $FOLDER_TARGET
+ fi
+ container_backup
+ 
+ # ls -l "$FOLDER_TARGET"
+ shasum5.30 $(find . -type f) > files.sha256
+ # ls -l "$FOLDER_TARGET"
+ IFS=' '
+ read -ra sum <<< "$(cat files.sha256)"
+ mv files.sha256 ".${sum[0]}.sha256"
+ # ls -l "$FOLDER_TARGET"
+}
+
+container_backup_daily() {
+ ORIGINAL="$(PWD)"
+ echo "[DEBUG] Updating the daily backup point"
+ container_backup_control "daily"
+ tar -cjf $FILE_DAILY ./
+ cd $ORIGINAL
+}
+
+container_backup_hourly() {
+ ORIGINAL="$(PWD)"
+ echo "[DEBUG] Updating the hourly backup point"
+ container_backup_control "hourly"
+ # tar -cjf $FILE_DAILY ./
+ cd $ORIGINAL
+}
+
+if [ -z $1 ] ; then
+ if [ ! -f $FILE_DAILY ] ; then
+  container_backup_daily
+ else
+  echo "$FILE_DAILY"
+  # if timestamp > 24hours - daily 
+ fi
+else
+ if [ "daily" == "$1" ] ; then
+  container_backup_daily
+ fi
+fi
+container_backup_hourly
+
+# always do hourly
+# do hourly
+# echo "$BACKUP_TAG"
