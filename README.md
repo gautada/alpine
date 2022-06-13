@@ -14,6 +14,7 @@ A very simple container that uses [Alpine Linux](https://alpinelinux.org).  This
 - Timezones: This and all downstream containers are set to the same timezone
 - Schedular: A time based esecution schedular for container self management
 - Environment Profile: A stackable mechanism for CLI environment and porfile definitions
+- Tools: A defined set of tools that help with container debugging and manipulation.
 
 ## Container
 

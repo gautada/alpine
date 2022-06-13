@@ -41,7 +41,7 @@ HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /hea
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap nmap-ncat gpg shadow sudo tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-ncat shadow sudo tzdata wget
 # RUN /sbin/apk add --no-cache python3
 
 # ╭――――――――――――――――――――╮
