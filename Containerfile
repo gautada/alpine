@@ -25,16 +25,24 @@ USER root
 WORKDIR /
 
 # ╭――――――――――――――――――――╮
+# │ BACKUP            │
+# ╰――――――――――――――――――――╯
+COPY container-backup /usr/sbin/container-backup
+RUN mkdir -p /opt/backup/.cache /opt/backup/points \
+ && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup  
+
+# ╭――――――――――――――――――――╮
+# │ HEALTHCHECK        │
+# ╰――――――――――――――――――――╯
+COPY healthcheck /healthcheck
+COPY hc-crond.sh /etc/healthcheck.d/hc-crond.sh
+HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
+
+# ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
 RUN /sbin/apk add --no-cache bind-tools curl git iputils nano nmap nmap-ncat gpg shadow sudo tzdata wget
-RUN /sbin/apk add --no-cache python3
-
-# ╭――――――――――――――――――――╮
-# │ TIMEZONES          │
-# ╰――――――――――――――――――――╯
-RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN /bin/echo "America/New_York" > /etc/timezone
+# RUN /sbin/apk add --no-cache python3
 
 # ╭――――――――――――――――――――╮
 # │ SUDO               │
@@ -43,11 +51,10 @@ COPY wheel-crond /etc/sudoers.d/wheel-crond
 COPY wheel-nmap /etc/sudoers.d/wheel-nmap
 
 # ╭――――――――――――――――――――╮
-# │ HEALTHCHECK        │
+# │ TIMEZONES          │
 # ╰――――――――――――――――――――╯
-COPY healthcheck /healthcheck
-COPY hc-crond.sh /etc/healthcheck.d/hc-crond.sh
-HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
+RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN /bin/echo "America/New_York" > /etc/timezone
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
@@ -58,5 +65,3 @@ COPY 10-ep-container.sh /etc/entrypoint.d/10-ep-container.sh
 COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
 COPY exitpoint /exitpoint
 ENTRYPOINT ["/entrypoint"]
-
-
