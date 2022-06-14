@@ -27,7 +27,7 @@ WORKDIR /
 # ╭――――――――――――――――――――╮
 # │ BACKUP             │
 # ╰――――――――――――――――――――╯
-COPY container-backup.fnc /etc/backup/container-backup.fnc
+COPY container-backup.fnc~ /etc/backup/container-backup.fnc~
 COPY container-backup /usr/sbin/container-backup
 RUN mkdir -p /etc/backup /var/backup /tmp/backup /opt/backup \
  && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \

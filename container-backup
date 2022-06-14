@@ -4,8 +4,16 @@
 #
 # Controller script for container wide back-up
 
-source /etc/backup/container-backup.fnc
+# Must have a defined file function
+FILE_FUNCTION="/etc/backup/container-backup.fnc"
+if [ ! -f $FILE_FUNCTION ] ; then
+ echo "[ INFO] Function file($FILE_FUNCTION) does not exist"
+ return 1
+else
+ source $FILE_FUNCTION
+fi
 
+# Load the encryption key
 ENCRYPTION_KEY="/etc/backup/encryption.key"
 KEY_FINGERPRINT="$(gpg --show-keys $ENCRYPTION_KEY | sed -n '2p' | xargs)"
 if [ "" == "$(gpg --list-keys)" ] ; then
@@ -14,6 +22,7 @@ else
  gpg --list-keys
 fi
 
+# Execute backup
 BACKUP_TAG="$(date +%H)"
 FOLDER_WORKING="/var/backup"
 FOLDER_CACHE="/tmp/backup"

@@ -1,8 +1,12 @@
 #!/bin/ash
 
+# container-backup.fnc
+#
+# Provides a testing container_backup function.  This is
+# just for testing or example.
+
 container_backup() {
  pwd
- echo "[ WARN] This function should be overloaded by the container"
  date > alpine-backup.txt
  FOLDER=$(date +%s)
  mkdir $FOLDER
