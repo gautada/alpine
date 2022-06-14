@@ -4,6 +4,8 @@
 #
 # Controller script for container wide back-up
 
+source /etc/backup/container-backup.fnc
+
 ENCRYPTION_KEY="/etc/backup/encryption.key"
 KEY_FINGERPRINT="$(gpg --show-keys $ENCRYPTION_KEY | sed -n '2p' | xargs)"
 if [ "" == "$(gpg --list-keys)" ] ; then
@@ -20,6 +22,9 @@ FOLDER_BACKUP="/opt/backup"
 cd $FOLDER_WORKING
 # Execute the container backup function
 container_backup
+if [ ! $? -eq 0 ] ; then
+ echo "[ERROR]: Function did not work"
+fi
 cd /
 
 # Clear all but the latest chain
