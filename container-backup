@@ -1,65 +1,48 @@
 #!/bin/sh
+#
+# container-backup
+#
+# Controller script for container wide back-up
 
-FOLDER_BACKUP="/opt/backup"
-FOLDER_WORKING="$FOLDER_BACKUP/.cache"
-FOLDER_DAILY="$FOLDER_WORKING/daily"
-FOLDER_HOURLY="$FOLDER_WORKING/hourly"
-FOLDER_BACKUPS="$FOLDER_BACKUP/points"
-FILE_DAILY="$FOLDER_BACKUPS/daily-container-backup.tar.bz2"
-BACKUP_TAG="$(date +%H)"
-FILE_HOURLY="$FOLDER_BACKUPS/$BACKUP_TAG-container-backup.tar.bz2"
-container_backup() {
- pwd
- echo "[ WARN] This function should be overloaded by the container"
- date > alpine-backup.txt
- FOLDER=$(date +%s)
- mkdir $FOLDER
- date > $FOLDER/another-backup.txt
-}
-
-container_backup_control() {
- FOLDER_TARGET=$FOLDER_WORKING/$1
- if [ ! -d $FOLDER_TARGET ] ; then
-  echo "[DEBUG] Working folder($FOLDER_TARGET) does not exist."
-  mkdir -p $FOLDER_TARGET
- else
-  rm -rf $FOLDER_TARGET/* $FOLDER_TARGET/.*.sha256
- fi
- cd $FOLDER_TARGET
- container_backup
-
- sha256sum $(find . -type f) > files.sha256
- SUM="$(sha256sum files.sha256 | head -c 64)"
- mv files.sha256 ".$(echo $SUM).sha256"
-}
-
-container_backup_daily() {
- ORIGINAL="$(pwd)"
- echo "[DEBUG] Updating the daily backup point"
- container_backup_control "daily"
- tar -cjf $FILE_DAILY ./
- cd $ORIGINAL
-}
-
-container_backup_hourly() {
- ORIGINAL="$(pwd)"
- echo "[DEBUG] Updating the hourly backup point"
- container_backup_control "hourly"
- tar -cjf $FILE_HOURLY ./
- cd $ORIGINAL
-}
-
-if [ -z $1 ] ; then
- if [ ! -f $FILE_DAILY ] ; then
-  container_backup_daily
- else
-  echo "$FILE_DAILY"
-  # if timestamp > 24hours - daily 
- fi
+ENCRYPTION_KEY="/etc/backup/encryption.key"
+KEY_FINGERPRINT="$(gpg --show-keys $ENCRYPTION_KEY | sed -n '2p' | xargs)"
+if [ "" == "$(gpg --list-keys)" ] ; then
+ gpg --trusted-key $KEY_FINGERPRINT --import $ENCRYPTION_KEY
 else
- if [ "daily" == "$1" ] ; then
-  container_backup_daily
- fi
+ gpg --list-keys
 fi
 
-container_backup_hourly
+BACKUP_TAG="$(date +%H)"
+FOLDER_WORKING="/var/backup"
+FOLDER_CACHE="/tmp/backup"
+FOLDER_BACKUP="/opt/backup"
+
+cd $FOLDER_WORKING
+# Execute the container backup function
+container_backup
+cd /
+
+# Clear all but the latest chain
+duplicity remove-all-but-n-full 1 --force file://$FOLDER_BACKUP
+
+FILE_MANIFEST=$FOLDER_BACKUP/duplicity-full.*.manifest.gpg
+# SET BACKUP CHAIN
+if [ ! -f $FILE_MANIFEST ] ; then
+ duplicity full --encrypt-key F637FEA3CEFBF0B21DBEE9E6585A99256A092267 --archive-dir $FOLDER_CACHE $FOLDER_WORKING file://$FOLDER_BACKUP
+else
+   # RESET BACKUP CHAIN - At midnight
+ if [ "00" == "$(date +%H)" ] ; then
+  duplicity full --encrypt-key F637FEA3CEFBF0B21DBEE9E6585A99256A092267 --archive-dir $FOLDER_CACHE $FOLDER_WORKING file://$FOLDER_BACKUP
+ else
+  TIMESTAMP_LAST=$(date +%s -r $FILE_MANIFEST)
+  TIMESTAMP_NOW=$(date +%s)
+  TIMESTAMP_DAY=86400
+  TIMESTAMP_DELTA=$(($TIMESTAMP_NOW-$TIMESTAMP_LAST))
+  # RESET BACKUP CHAIN - If older than 24 hours
+  if [ $TIMESTAMP_DAY -lt $TIMESTAMP_DELTA ] ; then
+   duplicity full --encrypt-key F637FEA3CEFBF0B21DBEE9E6585A99256A092267 --archive-dir $FOLDER_CACHE $FOLDER_WORKING file://$FOLDER_BACKUP
+  else # INCREMENTAL BACKUP
+   duplicity incr --encrypt-key F637FEA3CEFBF0B21DBEE9E6585A99256A092267 --archive-dir $FOLDER_CACHE $FOLDER_WORKING file://$FOLDER_BACKUP
+  fi
+ fi
+fi

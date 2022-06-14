@@ -21,15 +21,17 @@ LABEL description="Based container as a basic Alpine Linux distribution for use 
 ENV ENV="/etc/profile"
 COPY version /bin/version
 COPY 00-profile.sh /etc/profile.d/00-profile.sh
+COPY 10-container-backup.sh /etc/profile.d/10-container-backup.sh
 USER root
 WORKDIR /
 
 # ╭――――――――――――――――――――╮
-# │ BACKUP            │
+# │ BACKUP             │
 # ╰――――――――――――――――――――╯
 COPY container-backup /usr/sbin/container-backup
-RUN mkdir -p /opt/backup/.cache /opt/backup/points \
- && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup  
+RUN mkdir -p /etc/backup /var/backup /tmp/backup /opt/backup \
+ && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
+ && ln -s /opt/backup/encryption.key /etc/backup/encryption.key
 
 # ╭――――――――――――――――――――╮
 # │ HEALTHCHECK        │
