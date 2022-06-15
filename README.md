@@ -88,3 +88,19 @@ RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 ```
 
+## Notes
+
+### User configuration (Containerfile)
+
+```
+ARG USER=postgres
+VOLUME /opt/$USER
+RUN /bin/mkdir -p /opt/$USER \
+ && /usr/sbin/addgroup $USER \
+ && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
+ && /usr/sbin/usermod -aG wheel $USER \
+ && /bin/echo "$USER:$USER" | chpasswd \
+ && /bin/chown $USER:$USER -R /opt/$USER /etc/backup /var/backup /tmp/backup /opt/backup
+USER $USER
+WORKDIR /home/$USER
+```

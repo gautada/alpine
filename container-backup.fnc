@@ -6,9 +6,6 @@
 # just for testing or example.
 
 container_backup() {
- pwd
- date > alpine-backup.txt
- FOLDER=$(date +%s)
- mkdir $FOLDER
- date > $FOLDER/another-backup.txt
+ echo "[ WARN] Container backup function not defined"
+ return 1
 }

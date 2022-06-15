@@ -27,11 +27,11 @@ WORKDIR /
 # ╭――――――――――――――――――――╮
 # │ BACKUP             │
 # ╰――――――――――――――――――――╯
-COPY container-backup.fnc~ /etc/backup/container-backup.fnc~
+COPY container-backup.fnc /etc/backup/backup.d/container-backup.fnc
 COPY container-backup /usr/sbin/container-backup
-RUN mkdir -p /etc/backup /var/backup /tmp/backup /opt/backup \
+RUN mkdir -p /etc/backup/config /var/backup /tmp/backup /opt/backup \
  && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
- && ln -s /opt/backup/encryption.key /etc/backup/encryption.key
+ && ln -s /opt/backup/encryption.key /etc/backup/config/encryption.key
 
 # ╭――――――――――――――――――――╮
 # │ HEALTHCHECK        │
