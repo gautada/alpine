@@ -7,5 +7,8 @@
 
 container_backup() {
  echo "[ WARN] Container backup function not defined"
- return 1
+  return 1
+  
+ # date > $(date +%s).txt
+ # return 0
 }

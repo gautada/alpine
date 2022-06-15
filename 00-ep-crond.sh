@@ -1,9 +1,12 @@
 #!/bin/ash
 #
-# Scheduler entrypoint
+# Container Entrypoint
 #
-# echo "... [$0] ..."
-# Scheduler should always launch in the background (it will get corrected later (99) if it gets that far)
+# Clear old backups
+ echo "---------- [ BACKUP(duplicity) ] ----------"
+/bin/rm -rf /opt/backup/duplicity*
+
+# Launch schedular
 TEST="$(/usr/bin/pgrep /usr/sbin/crond)"
 if [ $? -eq 1 ] ; then
  echo "---------- [ SCHEDULER(crond) ] ----------"
