@@ -5,7 +5,7 @@
 # Controller script for container wide back-up
 
 # Must have a defined file function
-FILE_FUNCTION="/etc/backup/container-backup.fnc"
+FILE_FUNCTION="/etc/backup/backup.d/container-backup.fnc"
 if [ ! -f $FILE_FUNCTION ] ; then
  echo "[ INFO] Function file($FILE_FUNCTION) does not exist"
  return 1
@@ -14,7 +14,7 @@ else
 fi
 
 # Load the encryption key
-ENCRYPTION_KEY="/etc/backup/encryption.key"
+ENCRYPTION_KEY="/etc/backup/config/encryption.key"
 KEY_FINGERPRINT="$(gpg --show-keys $ENCRYPTION_KEY | sed -n '2p' | xargs)"
 if [ "" == "$(gpg --list-keys)" ] ; then
  gpg --trusted-key $KEY_FINGERPRINT --import $ENCRYPTION_KEY
