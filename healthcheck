@@ -31,7 +31,14 @@
 
 HEALTH=0
 
-run-parts --exit-on-error /etc/healthcheck.d/
+FOLDER_HEALTHCHECK_DROPIN="/etc/container/healthcheck.d"
+if [ ! -d $FOLDER_HEALTHCHECK_DROPIN ] ; then
+ echo "[ERROR]: No healthcheck dropin folder($FOLDER_HEALTHCHECK_DROPIN)."
+ return 1
+fi
+
+run-parts --exit-on-error $FOLDER_HEALTHCHECK_DROPIN
+
 if [ ! $? -eq 0 ] ; then
  HEALTH=1
 fi

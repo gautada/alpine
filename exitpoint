@@ -1,2 +1,12 @@
 #!/bin/ash
+
+FOLDER_EXITPOINT_DROPIN="/etc/container/exitpoint.d"
+if [ ! -d $FOLDER_EXITPOINT_DROPIN ] ; then
+ echo "[ERROR] No exitpoint drop-in folder($FOLDER_EXITPOINT_DROPIN)."
+ return 1
+fi
 echo "---------- [ EXIT ] ----------"
+if [ -d $FOLDER_EXITPOINT_DROPIN ] ; then
+ run-parts $FOLDER_EXITPOINT_DROPIN
+fi
+echo "---------- [ DONE ] ----------"

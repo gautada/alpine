@@ -19,25 +19,27 @@ LABEL description="Based container as a basic Alpine Linux distribution for use 
 # │ ENVIRONMENT        │
 # ╰――――――――――――――――――――╯
 ENV ENV="/etc/profile"
+RUN mkdir -p /etc/container \
+ && ln -s /etc/profile.d /etc/container/profile.d
 COPY version /bin/version
-COPY 00-profile.sh /etc/profile.d/00-profile.sh
+COPY 00-profile.sh /etc/container/profile.d/00-profile.sh
 USER root
 WORKDIR /
 
 # ╭――――――――――――――――――――╮
 # │ BACKUP             │
 # ╰――――――――――――――――――――╯
-COPY container-backup.fnc /etc/backup/backup.d/container-backup.fnc
+COPY backup.fnc /etc/container/backup.fnc
 COPY container-backup /usr/sbin/container-backup
-RUN mkdir -p /etc/backup/config /var/backup /tmp/backup /opt/backup \
+RUN mkdir -p /etc/container/keys /var/backup /tmp/backup /opt/backup \
  && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
- && ln -s /opt/backup/encryption.key /etc/backup/config/encryption.key
+ && ln -s /opt/backup/backup.key /etc/container/keys/backup.key
 
 # ╭――――――――――――――――――――╮
 # │ HEALTHCHECK        │
 # ╰――――――――――――――――――――╯
 COPY healthcheck /healthcheck
-COPY hc-crond.sh /etc/healthcheck.d/hc-crond.sh
+COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮
@@ -49,8 +51,9 @@ RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-nc
 # ╭――――――――――――――――――――╮
 # │ SUDO               │
 # ╰――――――――――――――――――――╯
-COPY wheel-crond /etc/sudoers.d/wheel-crond
-COPY wheel-nmap /etc/sudoers.d/wheel-nmap
+RUN ln -s /etc/sudoers.d /etc/container/wheel.d
+COPY wheel-crond /etc/container/wheel.d/wheel-crond
+COPY wheel-nmap /etc/container/wheel.d/wheel-nmap
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
@@ -62,8 +65,9 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
 COPY entrypoint /entrypoint
-COPY 00-ep-crond.sh /etc/entrypoint.d/00-ep-crond.sh
-COPY 10-ep-container.sh /etc/entrypoint.d/10-ep-container.sh
-COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
+COPY 00-ep-crond.sh /etc/container/entrypoint.d/00-ep-crond.sh
+COPY 10-ep-container.sh /etc/container/entrypoint.d/10-ep-container.sh
+COPY 99-ep-exec.sh /etc/container/entrypoint.d/99-ep-exec.sh
 COPY exitpoint /exitpoint
+RUN mkdir -p /etc/container/exitpoint.d
 ENTRYPOINT ["/entrypoint"]

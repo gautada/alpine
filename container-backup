@@ -5,7 +5,7 @@
 # Controller script for container wide back-up
 
 # Must have a defined file function
-FILE_FUNCTION="/etc/backup/backup.d/container-backup.fnc"
+FILE_FUNCTION="/etc/container/backup.fnc"
 if [ ! -f $FILE_FUNCTION ] ; then
  echo "[ INFO] Function file($FILE_FUNCTION) does not exist"
  return 1
@@ -14,7 +14,7 @@ else
 fi
 
 # Load the encryption key
-ENCRYPTION_KEY="/etc/backup/config/encryption.key"
+ENCRYPTION_KEY="/etc/container/keys/backup.key"
 KEY_FINGERPRINT="$(gpg --show-keys $ENCRYPTION_KEY | sed -n '2p' | xargs)"
 if [ "" == "$(gpg --list-keys)" ] ; then
  gpg --trusted-key $KEY_FINGERPRINT --import $ENCRYPTION_KEY
@@ -25,8 +25,8 @@ fi
  
 # Execute backup
 BACKUP_TAG="$(date +%H)"
-FOLDER_WORKING="/var/backup"
-FOLDER_CACHE="/tmp/backup"
+FOLDER_WORKING="/tmp/backup"
+FOLDER_CACHE="/var/backup"
 FOLDER_BACKUP="/opt/backup"
 
 cd $FOLDER_WORKING
@@ -46,6 +46,7 @@ FILE_MANIFEST=$FOLDER_BACKUP/duplicity-full.*.manifest.gpg
 # SET BACKUP CHAIN
 if [ ! -f $FILE_MANIFEST ] ; then
  echo "[ INFO]: FULL backup(File)"
+ 
  duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORKING file://$FOLDER_BACKUP
 else
    # RESET BACKUP CHAIN - At midnight

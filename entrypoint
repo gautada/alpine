@@ -21,13 +21,15 @@
 #
 export ENTRYPOINT_PARAMS="$@"
 
+FOLDER_ENTRYPOINT_DROPIN="/etc/container/entrypoint.d"
+if [ ! -d $FOLDER_ENTRYPOINT_DROPIN ] ; then
+ echo "[ERROR] No entrypint drop-in folder($FOLDER_ENTRYPOINT_DROPIN)."
+ return 1
+fi
 echo "---------- [ ENTRYPOINT: Alpine($(osversion)-$(whoami)) ] ----------"
-run-parts --exit-on-error /etc/entrypoint.d
-EXIT=$?
-if [ $? -eq 0 ] ; then
- /exitpoint
-else
+run-parts --exit-on-error $FOLDER_ENTRYPOINT_DROPIN
+if [ ! $? -eq 0 ] ; then
  echo "Entrypoint errored($EXIT) could not close cleanly"
 fi
-
+/exitpoint
 
