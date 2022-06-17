@@ -36,7 +36,6 @@ if [ ! $? -eq 0 ] ; then
  echo "[ERROR]: Function did not work"
  return 1
 fi
-rm -rvf $FOLDER_WORKING/*
 cd /
 
 # Clear all but the latest chain
@@ -69,3 +68,5 @@ else
   fi
  fi
 fi
+echo "[ INFO]: Clean working folder $FOLDER_WORKING"
+rm -rvf $FOLDER_WORKING/*
