@@ -29,13 +29,14 @@ FOLDER_WORKING="/tmp/backup"
 FOLDER_CACHE="/var/backup"
 FOLDER_BACKUP="/opt/backup"
 
+echo "[ INFO]: Execute the container backup function"
 cd $FOLDER_WORKING
-# Execute the container backup function
 container_backup
 if [ ! $? -eq 0 ] ; then
  echo "[ERROR]: Function did not work"
  return 1
 fi
+rm -rvf $FOLDER_WORKING/*
 cd /
 
 # Clear all but the latest chain
