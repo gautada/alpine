@@ -5,7 +5,7 @@ if [ ! -d $FOLDER_HEALTHCHECK_DROPIN ] ; then
  echo "[ERROR]: No healthcheck dropin folder($FOLDER_HEALTHCHECK_DROPIN)."
  return 1
 else
- for i in -d $FOLDER_HEALTHCHECK_DROPIN; do
+ for i in ${FOLDER_HEALTHCHECK_DROPIN}/hc-* ; do
   if [ -r $i ]; then
    echo "[ INFO]: Running $i"
    . $i
