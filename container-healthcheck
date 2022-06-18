@@ -1,0 +1,17 @@
+#!/bin/ash
+
+FOLDER_HEALTHCHECK_DROPIN="/etc/container/healthcheck.d"
+if [ ! -d $FOLDER_HEALTHCHECK_DROPIN ] ; then
+ echo "[ERROR]: No healthcheck dropin folder($FOLDER_HEALTHCHECK_DROPIN)."
+ return 1
+else
+ for i in -d $FOLDER_HEALTHCHECK_DROPIN; do
+  if [ -r $i ]; then
+   echo "[ INFO]: Running $i"
+   . $i
+   echo "[ INFO]: $i completed -- $?"
+  fi
+ done
+unset i
+fi
+

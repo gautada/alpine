@@ -40,6 +40,7 @@ RUN mkdir -p /etc/container/keys /var/backup /tmp/backup /opt/backup \
 # ╰――――――――――――――――――――╯
 COPY healthcheck /healthcheck
 COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh
+COPY container-healthcheck /usr/sbin/container-healthcheck
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮
