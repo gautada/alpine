@@ -34,6 +34,7 @@ COPY container-backup /usr/sbin/container-backup
 RUN mkdir -p /etc/container/keys /var/backup /tmp/backup /opt/backup \
  && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
  && ln -s /opt/backup/backup.key /etc/container/keys/backup.key
+ 
 
 # ╭――――――――――――――――――――╮
 # │ HEALTHCHECK        │
@@ -55,6 +56,7 @@ RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-nc
 RUN ln -s /etc/sudoers.d /etc/container/wheel.d
 COPY wheel-crond /etc/container/wheel.d/wheel-crond
 COPY wheel-nmap /etc/container/wheel.d/wheel-nmap
+COPY wheel-backup /etc/container/wheel.d/wheel-backup
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
@@ -72,3 +74,6 @@ COPY 99-ep-exec.sh /etc/container/entrypoint.d/99-ep-exec.sh
 COPY exitpoint /exitpoint
 RUN mkdir -p /etc/container/exitpoint.d
 ENTRYPOINT ["/entrypoint"]
+
+
+ 
