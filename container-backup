@@ -4,17 +4,50 @@
 #
 # Controller script for container wide back-up
 
-# Must have a defined file function
-FILE_FUNCTION="/etc/container/backup.fnc"
-if [ ! -f $FILE_FUNCTION ] ; then
- echo "[ INFO] Function file($FILE_FUNCTION) does not exist"
- return 1
+# Load all the fetures in the backup drop-in directory
+BACKUP_CONFIG="/etc/container/backup.d"
+BACKUP_FUNCTION="container_backup"
+BACKUP_LEGACY="/etc/container/backup.fnc"
+
+if [ -d $BACKUP_CONFIG ] ; then
+ for feature in $BACKUP_CONFIG/* ; do
+  if [ -r "$feature" ] ; then
+   echo "[ INFO]: Loading feature($feature)."
+   source "$feature"
+  fi
+ done
 else
- source $FILE_FUNCTION
+ if [ -f $BACKUP_LEGACY ] ; then
+  echo "[ INFO]: Loading legacy feature($BACKUP_LEGACY)."
+  source $BACKUP_LEGACY
+ else
+  echo "[ERROR]: Unable to load the drop-in directory($BACKUP_CONFIG) or function file($BACKUP_LEGACY)"
+  return 10
+ fi
+fi
+
+if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
+ echo "[ INFO]: Backup function($BACKUP_FUNCTION) loaded."
+else
+ echo "[ERROR]: Unable to find the backup function($BACKUP_FUNCTION)"
+ echo 11
 fi
 
 # Load the encryption key
-ENCRYPTION_KEY="/etc/container/keys/backup.key"
+LEGACY_KEY="/etc/container/keys/backup.key"
+ENCRYPTION_KEY="/etc/container/keys/backup-encryption.key"
+
+if [ -r $ENCRYPTION_KEY ] ; then
+ echo "[ INFO]: Default encryption key($ENCRYPTION_KEY)"
+else
+ if [ -r $LEGACY_KEY ] ; then
+  echo "[ WARN]: Overwrite Encryption Key with Legacy Key($LEGACY_KEY)"
+  ENCRYPTION_KEY=$LEGACY_KEY
+ else
+  echo "[ERROR]: Could not find Encryption Key($ENCROPTION_KEY) or Legacy Key($LEGACY_KEY)"
+  return 30
+ fi
+fi
 KEY_FINGERPRINT="$(gpg --show-keys $ENCRYPTION_KEY | sed -n '2p' | xargs)"
 if [ "" == "$(gpg --list-keys)" ] ; then
  gpg --trusted-key $KEY_FINGERPRINT --import $ENCRYPTION_KEY
