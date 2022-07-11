@@ -30,7 +30,7 @@ WORKDIR /
 # ╭――――――――――――――――――――╮
 # │ BACKUP             │
 # ╰――――――――――――――――――――╯
-COPY backup.fnc /etc/container/backup.fnc
+COPY backup.fnc /etc/container/backup.d/backup.fnc
 COPY container-backup /usr/sbin/container-backup
 RUN mkdir -p /etc/container/keys /var/backup /tmp/backup /opt/backup \
  && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
@@ -72,8 +72,8 @@ COPY entrypoint /entrypoint
 COPY 00-ep-crond.sh /etc/container/entrypoint.d/00-ep-crond.sh
 COPY 10-ep-container.sh /etc/container/entrypoint.d/10-ep-container.sh
 COPY 99-ep-exec.sh /etc/container/entrypoint.d/99-ep-exec.sh
-COPY exitpoint /exitpoint
-RUN mkdir -p /etc/container/exitpoint.d
+# COPY exitpoint /exitpoint
+# RUN mkdir -p /etc/container/exitpoint.d
 ENTRYPOINT ["/entrypoint"]
 
 
