@@ -23,6 +23,7 @@ RUN mkdir -p /etc/container \
  && ln -s /etc/profile.d /etc/container/profile.d
 COPY version /bin/version
 COPY 00-profile.sh /etc/container/profile.d/00-profile.sh
+RUN mkdir /etc/container/configmap.d 
 USER root
 WORKDIR /
 
