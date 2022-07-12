@@ -35,7 +35,7 @@ fi
 
 # Load the encryption key
 LEGACY_KEY="/etc/container/keys/backup.key"
-ENCRYPTION_KEY="/etc/container/keys/backup-encryption.key"
+ENCRYPTION_KEY="/etc/container/keys.d/backup-encryption.key"
 
 if [ -r $ENCRYPTION_KEY ] ; then
  echo "[ INFO]: Default encryption key($ENCRYPTION_KEY)"
