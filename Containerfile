@@ -23,7 +23,7 @@ RUN mkdir -p /etc/container \
  && ln -s /etc/profile.d /etc/container/profile.d
 COPY version /bin/version
 COPY 00-profile.sh /etc/container/profile.d/00-profile.sh
-RUN mkdir /etc/container/configmap.d 
+RUN mkdir /etc/container/configmap.d /etc/container/keys.d
 USER root
 WORKDIR /
 
@@ -32,9 +32,9 @@ WORKDIR /
 # ╰――――――――――――――――――――╯
 COPY backup.fnc /etc/container/backup.d/backup.fnc
 COPY container-backup /usr/sbin/container-backup
-RUN mkdir -p /etc/container/keys /var/backup /tmp/backup /opt/backup \
+RUN mkdir -p /etc/container/keys.d /var/backup /tmp/backup /opt/backup \
  && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
- && ln -s /opt/backup/backup.key /etc/container/keys/backup.key
+ && ln -s /opt/backup/backup-encryption.key /etc/container/keys.d/backup-encryption.key
  
 
 # ╭――――――――――――――――――――╮
