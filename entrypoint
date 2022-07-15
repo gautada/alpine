@@ -31,5 +31,5 @@ run-parts --exit-on-error $FOLDER_ENTRYPOINT_DROPIN
 if [ ! $? -eq 0 ] ; then
  echo "Entrypoint errored($EXIT) could not close cleanly"
 fi
-/exitpoint
+# /exitpoint
 
