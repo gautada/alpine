@@ -1,7 +1,5 @@
 # Alpine
 
-Test that I cannot make a direct change. 
-
 [Alpine Linux](https://alpinelinux.org) is an independent, non-commercial, general purpose Linux distribution designed for power users who appreciate security, simplicity and resource efficiency.
 
 This container is the base image that uses [Alpine Linux](https://alpinelinux.org) as the intial image for other containers as such it's primary purpose is to provide functionality and services for other downstream containers.
