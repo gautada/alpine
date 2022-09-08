@@ -9,17 +9,19 @@ platform:
 steps:
 - name: build
   environment:
-    ALPINE_VERSION: 3.16.0
+    ALPINE_VERSION: 3.16.2
   commands:
-  - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
+  - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:drone .
 - name: publish
   environment:
-    ALPINE_VERSION: 3.16.0
+    ALPINE_VERSION: 3.16.2
     DOCKERIO_USERNAME:
       from_secret: username.docker.io
     DOCKERIO_PASSWORD:
       from_secret: password.docker.io
   commands:
-   - podman tag alpine:build docker.io/$DOCKERIO_USERNAME/alpine:$ALPINE_VERSION
+   - podman tag alpine:drone docker.io/$DOCKERIO_USERNAME/alpine:$ALPINE_VERSION
+   - podman tag alpine:drone docker.io/$DOCKERIO_USERNAME/alpine:latest
    - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
    - podman push docker.io/$DOCKERIO_USERNAME/alpine:$ALPINE_VERSION
+   - podman push docker.io/$DOCKERIO_USERNAME/alpine:latest
