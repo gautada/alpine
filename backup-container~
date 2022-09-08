@@ -1,0 +1,94 @@
+#!/bin/ash
+
+# Backup working structure
+#
+# Create folder /var/container-backup
+# Mount backups folder (nfs) /var/container-backup/backups
+# Create working folder /var/container-backup/working
+#
+# Daily backup
+# In the working folder /var/container-backup/working
+# Create working copy .../daily/files/...
+# Create hash of files .../daily/files-timestamp.sha256
+# Create tar.bz2 of working copy .../daily/daily-backup.tar.bz2
+# Copy daily to /var/container-backup/daily-backup.tar.bz2
+# Encrypt working copy .../daily/daily-backup.gpg
+# Move encrypted working copy to /var/container-backup/backups/daily-backup.gpg
+# Remove folder /var/container-backup/working/daily
+#
+# Hourly Backup
+# In the working folder
+# Confirm clear working folder
+# Mount the daily backup
+# check the hash with the files
+# create working copy .../hourly/files/...
+# create file hash .../hourly/files-timestamp.sha256
+# create patch working copy .../patch/...
+# create diff patch .../patch/timestamp.patch
+# rename patch to timestamp-hash.patch
+# encrypt patch timestamp-hash.gpg
+# move patch
+
+FOLDER_BACKUP="/var/container-backup"
+if [ ! -d $FOLDER_BACKUP ] ; then
+ echo "[ERROR] Backup folder($FOLDER_BACKUP) is not available"
+ return 1
+fi
+
+FOLDER_OUTPUT="$FOLDER_BACKUP/backups"
+if [ ! -d $FOLDER_OUTPUT ] ; then
+ echo "[ERROR] Backup 'output' folder($FOLDER_OUTPUT) is not available"
+ return 2
+fi
+
+FOLDER_WORKING="$FOLDER_BACKUP/working"
+if [ ! -d $FOLDER_WORKING ] ; then
+ echo "[ERROR] Backup 'working' folder($FOLDER_WORKING) is not available"
+ return 3
+fi
+
+FOLDER_CACHE="$FOLDER_BACKUP/cache"
+if [ ! -d $FOLDER_CACHE ] ; then
+ echo "[ERROR] Backup 'cache' folder($FOLDER_CACHE) is not available"
+ return 4
+fi
+
+if [ -z $1 ] ; then # No parameter provided
+ echo "[DEBUG] Running ${0} script"
+ # Unless defined externally set the daily cycle for midnight
+ if [ -z $DAILY_BACKUP_CYCLE ] ; then
+  export DAILY_BACKUP_CYCLE="00"
+ fi
+ echo "[DEBUG] Setting daily backup cycle to '$DAILY_BACKUP_CYCLE'"
+ HOUR=$(date +%H)
+ echo "[DEBUG] Current hour '$HOUR'"
+ 
+ DAY=86400
+ NOW=$(date +%s)
+ FNC_DAILY="daily"
+ FILE_DAILY_CACHE="$FOLDER_CACHE/daily.tar.bz2"
+ if [ ! -f $FILE_DAILY_CACHE ] ; then # No daily file 
+  echo "[DEBUG] No cached daily file($FILE_DAILY_CACHE) found"
+  echo "DAILY 0"
+  ${0} "daily"
+  echo "DAILY 1"
+ else
+  echo "OTHER"
+  # CACHE=$(date +%s -r $FILE_DAILY_CACHE)
+  # DELTA=$NOW-$CACHE
+  # echo $DELTA 
+  # test age of file
+  # if hour == "00" refresh daily else refresh hour
+ fi
+else
+ if [ "$1" -eq "daily" ] ; then
+  echo "[DEBUG] Running 'daily' script"
+ fi
+ # if [ "hourly" -eq "$1" ] ; then
+ #  echo "[DEBUG] Running 'hourly' script"
+ # fi
+fi
+
+
+
+

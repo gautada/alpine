@@ -7,4 +7,5 @@
 #
 # DOWNSTREAM CONTAINERS SHOULD OVERWRITE THIS SCRIPT
 # echo "... [$0] ..."
+echo "---------- [ {DEFAULT}CONTAINER(...) ] ----------"
 return 0

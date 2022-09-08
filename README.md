@@ -2,60 +2,56 @@
 
 [Alpine Linux](https://alpinelinux.org) is an independent, non-commercial, general purpose Linux distribution designed for power users who appreciate security, simplicity and resource efficiency.
 
-A very simple container that uses [Alpine Linux](https://alpinelinux.org).  This container is designed to be the default base for most containers in this library.
+A very simple container that uses [Alpine Linux](https://alpinelinux.org).  This container is the base image for other containers as such it's primary purpose is to provide functionality and services for other downstream containers.
+
+## Container Services
+
+- Entrypoint: A stacked collection of startup scripts that launch supporting services for the running container but still provide a mechanism for cli command execution.
+- Exitpoint: Similar to entry pointbut on container application exit.
+- Healthcheck: A drop-in based system to stack all the needed checks for reporting container health including liveness and readiness.
+- Sudo: Tightly controlled access to privilege escalation through a stacked collection
+- Backup: A customizable container backup solution that defines a daily full backup and manages an hourly delta mechanism. 
+- Timezones: This and all downstream containers are set to the same timezone
+- Schedular: A time based esecution schedular for container self management
+- Environment Profile: A stackable mechanism for CLI environment and porfile definitions
+- Tools: A defined set of tools that help with container debugging and manipulation.
 
 ## Container
 
 ### Versions
 
-- - April 30, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.15 .4](https://git.alpinelinux.org/aports/log/?h=v3.15.4)
+- April 30, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.15 .4](https://git.alpinelinux.org/aports/log/?h=v3.15.4)
+- May 31, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.16 .0](https://git.alpinelinux.org/aports/log/?h=v3.16.0)
 
-### Build
+### Configuration
+
+#### Build Arguments
+
+Image Version and Application Version
+
+#### Build
 
 ```
-docker build --build-arg ALPINE_VERSION=3.15.4 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:dev .
+db
 ``` 
 
-### Run
-
-All containers are ment to be run in `--detatch` mode.
+#### Run
 ```
-docker run --detach --interactive --name alpine -p 2222:22 --rm --tty --volume ~/Workspace/alpine/bastion-container:/opt/bastion alpine:dev
+dr
 ```
 
-To interact with the container
-```
-docker exec --interactive --tty alpine /bin/ash
-```
-
-### Deploy
+All containers are ment to be run in `--detatch` mode. To interact
 
 ```
-docker tag alpine:dev docker.io/gautada/alpine:3.15.4
-docker login --username=gautada docker.io
-docker push docker.io/gautada/alpine:3.15.4
+de
 ```
 
-### Bastion Server
-
-Bastion is the access to the container. To setup the bastion server, i.e. the ssh server
-
-### Services
-- Environments 
- - Profile
-- Timezones
-- Sudo
-- Versioning
-- Healthcheck
-- Entrypoint
-- Bastion
-- Scheduler
-
-
+#### Deploy
 
 ```
-docker exec --user root /usr/bin/ssh-keygen
+dp
 ```
+
 
 
 ### Container Configuration
@@ -92,18 +88,19 @@ RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 ```
 
-#### Bastion
+## Notes
 
-A [bastion](https://en.wikipedia.org/wiki/Bastion_host) is a networking host that is designed to withstand external attacks.  This container service uses the bastion concept as a point of entry for accessing the container and the services within. This service is implemented with [openssh](https://www.openssh.com). The primary mechanism for interacting with the container should remain using the `podman[docker] exec` function however the bastion service allows for external control when configured and pod-to-pod control when in a k8s cluster.
-
-Basic setup is an sshd service on port `22`.  With `PermitRootLogin no` and `PasswordAuthentication no`, so no root logins allowed and no password based logins. To use provide a bastion folder via `volume` or an nfs volume for k8s.
-
-When running local setup access via the `--port 22:2222` mapping and the ssh keys are mapped via `--volume ~/Workspace/alpine/bastion:/opt/bastion`. **Note:** `.gitignore` should be updated to not include the local bastion folder.
-
-For security bastion cannot run out-of-the box, you must create the server keys and the authorized_keys file.  These keys are provided via the bastion folder/volume from the host so once created they should work from each reboot.  Running locally the **first run** of the container must be restarted after setup to get the bastion service started or use a generic alpine container to create the bastion folder/volume before first run.
+### User configuration (Containerfile)
 
 ```
-docker exec --interactive --tty --user root alpine /usr/bin/bastion-setup
+ARG USER=postgres
+VOLUME /opt/$USER
+RUN /bin/mkdir -p /opt/$USER \
+ && /usr/sbin/addgroup $USER \
+ && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
+ && /usr/sbin/usermod -aG wheel $USER \
+ && /bin/echo "$USER:$USER" | chpasswd \
+ && /bin/chown $USER:$USER -R /opt/$USER /etc/backup /var/backup /tmp/backup /opt/backup
+USER $USER
+WORKDIR /home/$USER
 ```
-
-Gnerally, containers use only one **USER**.  Therefore, the generic `/opt/bastion/ssh` folder that contains the `authorized_keys` file should be owned and constrained for the single **USER**.

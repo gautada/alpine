@@ -19,11 +19,45 @@ LABEL description="Based container as a basic Alpine Linux distribution for use 
 # │ ENVIRONMENT        │
 # ╰――――――――――――――――――――╯
 ENV ENV="/etc/profile"
+RUN mkdir -p /etc/container \
+ && ln -s /etc/profile.d /etc/container/profile.d
+COPY version /bin/version
+COPY 00-profile.sh /etc/container/profile.d/00-profile.sh
+RUN mkdir /etc/container/configmap.d /etc/container/keys.d
+USER root
+WORKDIR /
+
+# ╭――――――――――――――――――――╮
+# │ BACKUP             │
+# ╰――――――――――――――――――――╯
+COPY backup.fnc /etc/container/backup.d/backup.fnc
+COPY container-backup /usr/sbin/container-backup
+RUN mkdir -p /etc/container/keys.d /var/backup /tmp/backup /opt/backup \
+ && ln -s /usr/sbin/container-backup /etc/periodic/hourly/container-backup \
+ && ln -s /opt/backup/backup-encryption.key /etc/container/keys.d/backup-encryption.key
+ 
+
+# ╭――――――――――――――――――――╮
+# │ HEALTHCHECK        │
+# ╰――――――――――――――――――――╯
+COPY healthcheck /healthcheck
+COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh
+COPY container-healthcheck /usr/sbin/container-healthcheck
+HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
 
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache curl git iputils nano openssh sudo shadow tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-ncat shadow sudo tzdata wget
+# RUN /sbin/apk add --no-cache python3
+
+# ╭――――――――――――――――――――╮
+# │ SUDO               │
+# ╰――――――――――――――――――――╯
+RUN ln -s /etc/sudoers.d /etc/container/wheel.d
+COPY wheel-crond /etc/container/wheel.d/wheel-crond
+COPY wheel-nmap /etc/container/wheel.d/wheel-nmap
+COPY wheel-backup /etc/container/wheel.d/wheel-backup
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
@@ -32,73 +66,15 @@ RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN /bin/echo "America/New_York" > /etc/timezone
 
 # ╭――――――――――――――――――――╮
-# │ SUDO               │
-# ╰――――――――――――――――――――╯
-RUN /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond" >> /etc/sudoers \
- && /bin/echo "%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
-
-# ╭――――――――――――――――――――╮
-# │ VERSIONING         │
-# ╰――――――――――――――――――――╯
-COPY version /bin/version
-COPY 00-profile.sh /etc/profile.d/00-profile.sh
-
-# ╭――――――――――――――――――――╮
-# │ HEALTHCHECK        │
-# ╰――――――――――――――――――――╯
-COPY healthcheck /healthcheck
-COPY hc-bastion.sh /etc/healthcheck.d/hc-bastion.sh
-COPY hc-crond.sh /etc/healthcheck.d/active/hc-crond.sh
-HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /healthcheck
-
-# ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
 COPY entrypoint /entrypoint
-COPY 00-ep-bastion.sh /etc/entrypoint.d/00-ep-bastion.sh
-COPY 01-ep-crond.sh /etc/entrypoint.d/01-ep-crond.sh
-COPY 10-ep-container.sh /etc/entrypoint.d/10-ep-container.sh
-COPY 99-ep-exec.sh /etc/entrypoint.d/99-ep-exec.sh
+COPY 00-ep-crond.sh /etc/container/entrypoint.d/00-ep-crond.sh
+COPY 10-ep-container.sh /etc/container/entrypoint.d/10-ep-container.sh
+COPY 99-ep-exec.sh /etc/container/entrypoint.d/99-ep-exec.sh
+# COPY exitpoint /exitpoint
+# RUN mkdir -p /etc/container/exitpoint.d
 ENTRYPOINT ["/entrypoint"]
 
-# ╭――――――――――――――――――――╮
-# │ BASTION            │
-# ╰――――――――――――――――――――╯
-EXPOSE 22/tcp
-VOLUME /opt/bastion
-COPY bastion-setup /usr/bin/bastion-setup
-# AuthorizedKeysFile - Specifies the file that contains the public keys used for user authentication. Default is changed to /opt/bastion/ssh/authorized_keys
-# HostKey Specifies a file containing a private host key used by SSH. The defaults are /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key and /etc/ssh/ssh_host_rsa_key
-# PermitRootLogin no
-# PasswordAuthentication no
-RUN /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config~ \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/echo "# ***** ALPINE CONTAINER - BASTION SERVICE *****" >> /etc/ssh/sshd_config \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/echo "" >> /etc/ssh/sshd_config \
- && /bin/sed -i -e "/AuthorizedKeysFile/s/^#*/# /" /etc/ssh/sshd_config \
- && /bin/echo "AuthorizedKeysFile       /opt/bastion/ssh/authorized_keys" >> /etc/ssh/sshd_config \
- && /bin/sed -i -e "/HostKey/s/^#*/# /" /etc/ssh/sshd_config \
- && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
- && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
- && /bin/echo "HostKey                  /opt/bastion/etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
- && /bin/echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
- && /bin/echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
-# ╭――――――――――――――――――――╮
-# │ USER               │
-# ╰――――――――――――――――――――╯
-ARG USER=bastion
-RUN /bin/mkdir -p /opt/$USER \
- && /usr/sbin/addgroup $USER \
- && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
- && /usr/sbin/usermod -aG wheel $USER \
- && /bin/echo "$USER:$USER" | chpasswd \
- && /bin/chown $USER:$USER -R /opt/$USER
-
-# ╭――――――――――――――――――――╮
-# │ WORKING DIR        │
-# ╰――――――――――――――――――――╯
-USER root
-WORKDIR /
+ 
