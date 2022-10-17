@@ -22,7 +22,7 @@ ENV ENV="/etc/profile"
 RUN mkdir -p /etc/container \
  && ln -s /etc/profile.d /etc/container/profile.d
 COPY version /bin/version
-COPY 00-profile.sh /etc/container/profile.d/00-profile.sh
+COPY 00-alias.sh /etc/container/profile.d/00-alias.sh
 RUN mkdir /etc/container/configmap.d /etc/container/keys.d
 USER root
 WORKDIR /

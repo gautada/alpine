@@ -2,9 +2,9 @@
 
 [Alpine Linux](https://alpinelinux.org) is an independent, non-commercial, general purpose Linux distribution designed for power users who appreciate security, simplicity and resource efficiency.
 
-This container is the base image that uses [Alpine Linux](https://alpinelinux.org) as the intial image for other containers as such it's primary purpose is to provide functionality and services for other downstream containers.
+This container is the base image that uses Alpine Linux as the intial image for other containers as such it's primary purpose is to provide functionalityservices for other downstream containers.
 
-## Container Services
+## Services
 
 - Entrypoint: A stacked collection of startup scripts that launch supporting services for the running container but still provide a mechanism for cli command execution.
 - *DROP THIS* Exitpoint: Similar to entry pointbut on container application exit.
@@ -22,32 +22,31 @@ This container is the base image that uses [Alpine Linux](https://alpinelinux.or
 - May 31, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.16.0](https://git.alpinelinux.org/aports/log/?h=v3.16.0)
 - September 8, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.16.2](https://git.alpinelinux.org/aports/log/?h=v3.16.0)
 
-## Container Notes
+## Notes
+
+### Entrypoint
+This container provides the `/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The `/entrypoint` script call the subsequent scripts in the `/etc/entrypoint.d` drop-in folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`.
+
+### Healthcheck
+By default this image provides a method for checking the running health of a container. The script `/usr/sbin/container-healthcheck` runs all subscripts in the healthcheck drop-in folder
+`/etc/container/healthcheck.d`. Healthchecks are generally considered to be cummulative. Downstream images should add more healthchecks using the `Containerfile` via `COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh`
 
 ### Profile 
 The default profile for Alpine is the `ash` shell.  This is configured as default using `ENV ENV="/etc/profile"` in the `Containerfile`. Usually to customize just add scripts `/etc/profile.d` folder
 
-### Version
-This the operating system container defines two version [aliases](https://linuxhandbook.com/linux-alias-command/) (`osversion` and `cversion`)
-- **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
-- **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
-
-### Entrypoint
-
-This container provides the `/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The `/entrypoint` script call the subsequent scripts in the `/etc/entrypoint.d` drop-in folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`.
+### Sudo
+To allow for super user access the container uses a wheel mechanism.  This requires the 
+default user to be part of the `wheel` group via `/usr/sbin/usermod -aG wheel $USER`. To enable super user access to members of the `wheel` group, a wheel defintion file (wheel-[name]) must be provided that defines a sudo access line (i.e. `%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/container-backup`). The wheel definition file should be loaded into the wheel drop-in folder in the `Containerfile` via `COPY wheel-backup /etc/container/wheel.d/wheel-backup`.
 
 ### Timezone
-
 By default the timezone is set to US/New York a.k.a US/Eastern.  This provides consistency across containers.
-
 ```
 RUN apk add --no-cache tzdata
 RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 ```
 
-### User Configuration (Containerfile)
-
+### User
 Each downstream image should co figure their own downstream default user in the `Containerfile`
 ```
 ARG USER=postgres
@@ -61,3 +60,8 @@ RUN /bin/mkdir -p /opt/$USER \
 USER $USER
 WORKDIR /home/$USER
 ```
+
+### Version
+This the operating system container defines two version [aliases](https://linuxhandbook.com/linux-alias-command/) (`osversion` and `cversion`)
+- **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
+- **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
