@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  drone:
+    build:
+      args:
+        ALPINE_VERSION: "3.16.2"
+      context: .
+      dockerfile: Containerfile
+      no_cache: true
+      tags:
+        - "alpine:dev"
+    image: "alpine:dev"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "development:/opt/alpine"
+      - "backup:/opt/backup"
+        
+volumes:
+  development:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /Users/mada/Workspace/alpine/development-volume
+  backup:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /Users/mada/Workspace/alpine/backup-volume
+      
