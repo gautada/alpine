@@ -1,2 +1,0 @@
-# For testing the container-backup script as root
-%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/container-backup

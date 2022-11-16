@@ -1,26 +1,133 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4.puml>
+!include <C4/C4_Context.puml>
+!include <C4/C4_Container.puml>
+!include <C4/C4_Component.puml>
+!include <C4/C4_Dynamic.puml>
+!include <C4/C4_Deployment.puml>
 
-' Person(alias, label, ?descr, ?sprite, ?tags, $link)
-' Component(alias, label, ?techn, ?descr, ?sprite, ?tags, $link)
-' ComponentDb
-' ComponentQueue
-' Component_Ext
-' ComponentDb_Ext
-' ComponentQueue_Ext
+title "Component Diagram - Default - Alpine"
 
-Person(user, "Client")
-Component(folder1, "Folder", "SSH Keys")
-System_Boundary(container, "Container", "Alpine Linux") {
- Component(bastion, "Bastion")
- Component(folder2, "Folder", "SSH Keys")
- Component(process, "Container Process")
- Component(services, "Container Services")
+Boundary("etc", "etc Folder", "/etc") {
+ Component("sudoers", "Sudoers File ", "/etc/sudoers")
+ Component("profile", "Profile File ", "/etc/profile")
+ Boundary("sudoers_d", "sudoers.d Drop-in Folder", "/etc/sudoers.d") {
+  Component("container_wheel", "Container Wheel File", "/etc/sudoers.d/container_wheel") 
+ }
+ Boundary("profile_d", "profile.d Drop-in Folder", "/etc/profile.d") {
+  Component("container_profile", "Container Profile File", "/etc/profile.d/container_profile") 
+ }
+}
+Rel("sudoers", "sudoers_d", "includes")
+Rel("profile", "profile_d", "includes")
+
+Component_Ext("containerfile", "Container Defintion", "containerfile")
+Boundary("container_configuration", "Container Configuration Folder", "/etc/container") {
+ Component("_backup", "Backup Function File", "/etc/container/backup")
+ Component("_entrypoint", "Entrypoint Function File", "/etc/container/entrypoint")
+ Component("_healthcheck", "Healthcheck Function File", "/etc/container/healthcheck") 
+ Component("_profile", "Profile Function File", "/etc/container/profile")
+ Component("_wheel", "Wheel Function File", "/etc/container/wheel")
+}
+Rel("containerfile", "container_configuration", "overwrite", "COPY")
+
+
+Boundary("scripts", "Folder", "/usr/bin") {
+ Component("backup", "Backup Script", "/container-backup")
+ Component("entrypoint", "Entrypoint Script", "/container-entrypoint")
+ Component("healthcheck", "Healthcheck Script", "/container-healthcheck")
+}
+Rel("backup", "_backup", "calls")
+Rel("entrypoint", "_entrypoint", "calls")
+Rel("healthcheck", "_healthcheck", "calls")
+
+Boundary("volumes", "Volumes Folder", "/mnt/volumes") {
+ Component("container_volume", "Container Volume", "/mnt/volumes/container")
+ Component("backup_volume", "Backup Volume", "/mnt/volumes/backup")
+ Boundary("configmap", "Configmap Folder", "/configmap") {
+  Component(keys, "Backup Keys Volume", "/backup_keys")
+ }
 }
 
-Rel(user, bastion, "Secure Access", "ssh[22;2222]")
-Rel(bastion, process, "Proxy Admin")
-Rel(bastion, services, "Proxy Admin")
-Rel(folder1, folder2, "Shared", "volume")
-Rel(folder2, bastion, "Configures Access")
+Rel("container_profile", "_profile", "symlink")
+Rel("container_wheel", "_wheel", "symlink")
+Rel("backup", "backup_volume", "backup archive data")
+Rel("_wheel", "container_volume", "symlink")
+Rel("_profile", "container_volume", "symlink")
+Rel("_healthcheck", "container_volume", "symlink")
+Rel("_entrypoint", "container_volume", "symlink")
+Rel("_backup", "container_volume", "symlink")
+
+@enduml
+
+
+
+
+
+
+
+
+
+
+---
+
+@startuml COMPONENT_CONTAINER_STATUS
+!include <C4/C4.puml>
+!include <C4/C4_Context.puml>
+!include <C4/C4_Container.puml>
+!include <C4/C4_Component.puml>
+!include <C4/C4_Dynamic.puml>
+!include <C4/C4_Deployment.puml>
+
+title "Component Diagram - Default - Alpine - Status Check"
+
+Component_Ext("containerfile", "Containerfile", "OCI Container file")
+
+Boundary("etc", "etc Folder", "/etc") {
+ Boundary("container_configuration", "Container Configuration Folder", "/etc/container") {
+  Component("health_check", "Health Check Function File", "/etc/container/health-check")
+  Component("liveness_check", "Liveness Check Function File", "/etc/container/liveness-check")
+  Component("readiness_check", "Readiness Check Function File", "/etc/container/readiness-check")
+  Component("startup_check", "Startup Check Function File", "/etc/container/startup-check")
+ }
+}
+Rel("startup_check", "health_check", "symlink")
+Rel("readiness_check", "health_check", "symlink")
+Rel("liveness_check", "health_check", "symlink")
+
+Rel("containerfile", "health_check", "COPY")
+Rel("containerfile", "liveness_check", "COPY")
+Rel("containerfile", "readiness_check", "COPY")
+Rel("containerfile", "startup_check", "COPY")
+
+Boundary("scripts", "Folder", "/usr/bin") {
+ Component("container_status_check", "Status Check Script", "/container-status-check")
+ Component("container_health_check", "Health Check Script", "/container-health-check")
+ Component("container_liveness_check", "Liveness Check Script", "/container-liveness-check")
+ Component("container_readiness_check", "Readiness Check Script", "/container-readiness-check")
+ Component("container_startup_check", "Startup Check Script", "/container-startup-check")
+}
+
+Rel("container_health_check", "container_status_check", "symlink")
+Rel("container_liveness_check", "container_status_check", "symlink")
+Rel("container_readiness_check", "container_status_check", "symlink")
+Rel("container_startup_check", "container_status_check", "symlink")
+
+Rel("container_status_check", "health_check", "calls[conditional]")
+Rel("container_status_check", "liveness_check", "calls[conditional]")
+Rel("container_status_check", "readiness_check", "calls[conditional]")
+Rel("container_status_check", "startup_check", "calls[conditional]")
+
+Rel("containerfile", "container_status_check", "COPY[rare]")
+
+Boundary("mnt", "mnt Folder", "/mnt") {
+ Boundary("volumes", "volumes Mount Point", "/mnt/volumes") {
+  Boundary("container", "container Volume", "/mnt/volumes/container") {
+   Component("healthcheck", "HealthCheck File", "/mnt/volumes/container/healthcheck")
+  }
+ }
+}
+
+Rel("health_check", "healthcheck", "calls[dev]")
+
 @enduml

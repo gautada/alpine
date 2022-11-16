@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# health-check: This is the default status check. Unless overridden all status checks
+#               [health|liveness|readiness|startup] should end up here. This script 
+#               should be overidden by downstream containers or by providing a volume 
+#               that has `status-check` script.  This script will return a 1 by default
+#               if the script is not found.
+# 
+# author: adam@gautier.org
+# date: 2022-11-16
+# component: status
+#
+# - - - - - - - - - - - - - - - - - - - - - - -
+
+DEFAULT_STATUS_CHECK="/mnt/volumes/container/status-check"
+
+if [ ! -f $DEFAULT_STATUS_CHECK ] ; then
+ echo "[ERROR] Unable to find default status check($DEFAULT_STATUS_CHECK) script"
+ return 1
+fi
+
+exec $DEFAULT_STATUS_CHECK
+RTN=$?
+if [ $RTN -ne 0 ] ; then
+ echo "[ERROR] Invalid status($RTN) check($DEFAULT_STATUS_CHECK)"
+fi
+return $RTN

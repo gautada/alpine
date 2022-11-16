@@ -1,0 +1,7 @@
+# For testing the container-backup script as root
+%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/container-backup
+# Starting and killing crond
+%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/crond
+%wheel         ALL = (ALL) NOPASSWD: /usr/bin/killall
+# Allow for full nmap usage
+%wheel         ALL = (ALL) NOPASSWD: /usr/bin/nmap

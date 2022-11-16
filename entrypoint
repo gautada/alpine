@@ -1,35 +1,85 @@
 #!/bin/ash
 #
-# [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint)
-# An ENTRYPOINT allows you to configure a container that will run as an executable.
+# [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint) is the default
+# initial process which and executes all the applications and services that run in a container.
 #
-# This is the default ENTRYPOINT and will be augmented and used by downstream
-# containers.
+# This is the default ENTRYPOINT located at `/usr/sbin/entrypoint` and should be 
+# augmented when used in downstream containers by over writting the `/etc/container/entrypoint` 
+# file (which by default is a symlink to `/mnt/volumes/container/entrypoint`
 #
-# This is the default entrypoint script for this and all downstream containers.
-# This script just calls all of the scripts (note: should be shell scripts) that
-# are in `/etc/entrypoint.d`. These script initialize and run the container services
-# and the container process.  Scripts loaded should:
-# - return a != 0 if a forground process is called to stop subsequent scripts being called.
-# - Services should check to make sure they are not already running.
-#
-# The last script(99-) executes whatever the container parameters provided from the command line.
-# The default container process is crond.  If the entrypoint gets to the last script and there
-# has not been priovided with executable parameters, then crond will be re-launched in the forground to
-# keep the container up and running.
-#
-#
-export ENTRYPOINT_PARAMS="$@"
 
-FOLDER_ENTRYPOINT_DROPIN="/etc/container/entrypoint.d"
-if [ ! -d $FOLDER_ENTRYPOINT_DROPIN ] ; then
- echo "[ERROR] No entrypint drop-in folder($FOLDER_ENTRYPOINT_DROPIN)."
+ENTRYPOINT_PARAMS="$@"
+
+echo "---------- [ Container: Alpine($(osversion)-$(whoami)) ] ----------"
+ENTRYPOINT_FUNCTION="/etc/container/entrypoint.fnc"
+if [ ! -f $ENTRYPOINT_FUNCTION ] ; then
+ echo "[ERROR] No entrypint function($ENTRYPOINT_FUNCTION)"
  return 1
 fi
-echo "---------- [ ENTRYPOINT: Alpine($(osversion)-$(whoami)) ] ----------"
-run-parts --exit-on-error $FOLDER_ENTRYPOINT_DROPIN
-if [ ! $? -eq 0 ] ; then
- echo "Entrypoint errored($EXIT) could not close cleanly"
-fi
-# /exitpoint
 
+
+
+echo "---------- [ Back-up(duplicity) ] ----------"
+/bin/rm -rvf /opt/backup/duplicity*
+
+
+
+echo "---------- [ Scheduler(crond) ] ----------"
+/usr/bin/pgrep /usr/sbin/crond > /dev/null
+RTN=$?
+if [ $RTN -eq 1 ] ; then
+ /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /var/log/scheduler.log
+ RTN=$?
+ if [ $RTN -ne 0 ] ; then
+  echo "[ERROR] command failed"
+  return 3
+ fi
+else
+ echo "[ERROR] Test command failed"
+ return 2
+fi
+/usr/bin/pgrep /usr/sbin/crond > /dev/null
+RTN=$?
+ if [ $RTN -ne 0 ] ; then
+  echo "[ERROR] scheduler not started"
+  return 4
+ fi
+
+
+
+RTN=0
+if [ -f "/etc/container.d/container-entrypoint" ] ; then
+ echo "---------- [ Container(file) ] ----------"
+ /etc/container.d/container-entrypoint $ENTRYPOINT_PARAMS
+ RTN=$?
+else
+ if [ -L "/etc/container.d/container-entrypoint" && -e "/etc/container.d/container-entrypoint" ]; then
+  echo "---------- [ Container(symlink) ] ----------"
+  /etc/container.d/container-entrypoint $ENTRYPOINT_PARAMS
+  RTN=$? 
+ fi
+fi
+if [ $RTN -ne 0 ] ; then
+   echo "[ERROR] command failed"
+  return 5
+ fi
+
+
+
+if [ ! -z "$ENTRYPOINT_PARAMS" ] ; then
+ echo "---------- [ Execute($ENTRYPOINT_PARAMS) ] ----------"
+ . /etc/profile
+ exec $ENTRYPOINT_PARAMS
+ RTN=$?
+ return $RTN
+else
+  echo "----------[ Entrypoint(block) ----------"
+  # Kill the background crond and restart with the forground service.  Crond is the default
+  # container process.
+  /usr/bin/pgrep /usr/sbin/crond > /dev/null
+  RTN=$?
+  if [ $? -eq 0 ] ; then
+   /usr/bin/sudo /usr/bin/killall crond
+  fi
+  /usr/bin/sudo /usr/sbin/crond -f -l 0
+fi
