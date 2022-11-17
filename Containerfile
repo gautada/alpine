@@ -28,10 +28,9 @@ RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup /mnt/volumes/confi
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-# RUN /bin/mkdir -p /etc/container.d \
-#  && /bin/ln -svf /mnt/volumes/container/container-entrypoint /etc/container.d/container-entrypoint 
-# COPY entrypoint /usr/bin/entrypoint
-# ENTRYPOINT ["/usr/bin/entrypoint"]
+RUN /bin/ln -fsv /mnt/volumes/container/entrypoint /etc/container/entrypoint
+COPY container-entrypoint /usr/bin/container-entrypoint
+ENTRYPOINT ["/usr/bin/container-entrypoint"]
 
 # ╭――――――――――――――――――――╮
 # │ ENVIRONMENT        │

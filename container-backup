@@ -51,9 +51,12 @@ else
 fi
 
 KEY_FINGERPRINT="$(/usr/bin/gpg --show-keys $BACKUP_KEY | sed -n '2p' | xargs)"
+echo "[ INFO] Fingerprint: $KEY_FINGERPRINT"
 if [ "" == "$(/usr/bin/gpg --list-keys)" ] ; then
- /usr/bin/gpg --trusted-key $KEY_FINGERPRINT --import $ENCRYPTION_KEY
+ echo "[ INFO] Importing key"
+ /usr/bin/gpg --trusted-key $KEY_FINGERPRINT --import $BACKUP_KEY
 else
+ echo "[ INFO] List keys"
  /usr/bin/gpg --list-keys
 fi
  # gpg --trusted-key $(gpg --show-keys /etc/backup/config/encryption.key | sed -n '2p' | xargs) --import /etc/backup/config/encryption.key
@@ -71,7 +74,8 @@ fi
 #   return 30
 #  fi
 # fi
- 
+
+
 # Execute backup
 BACKUP_TAG="$(date --utc +%H)"
 # FOLDER_WORKING="/tmp/backup"
@@ -79,7 +83,7 @@ FOLDER_WORK="/tmp/backup"
 FOLDER_CACHE="/var/backup"
 # FOLDER_BACKUP="/opt/backup"
 FOLDER_DEST="/mnt/volumes/backup"
-FILE_MANIFEST=$FOLDER_DEST/duplicity-full.*.manifest.gpg
+
 
 # Collect backup material
 /bin/mkdir -p $FOLDER_WORK
@@ -99,16 +103,17 @@ cd /
 # Clear all but the latest chain
 echo "[ INFO]: Clean up backups"
 /usr/bin/duplicity remove-all-but-n-full 1 --force file://$FOLDER_DEST
+FILE_MANIFEST="$FOLDER_DEST/duplicity-full.*.manifest.gpg"
 
 # Backup $FOLDER_WORK -> $FOLDER_CACHE -> $FOLDER_DEST
 # Determine if full or incremental
 if [ ! -f $FILE_MANIFEST ] ; then
- echo "[ INFO]: FULL backup(File)"
+ echo "[ INFO]: FULL backup(No Manifest)"
  /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
 else
    # RESET BACKUP CHAIN - At midnight
  if [ "00" == "$(date --utc +%H)" ] ; then
-  echo "[ INFO]: FULL backup(00)"
+  echo "[ INFO]: FULL backup(Daily 00)"
   /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
  else
   TIMESTAMP_LAST=$(date --utc +%s -r $FILE_MANIFEST)
@@ -121,7 +126,7 @@ else
      /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
   else # INCREMENTAL BACKUP
    echo "[ INFO]: INCREMENTAL backup"
-   duplicity incr --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
+   /usr/bin/duplicity incr --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
   fi
  fi
 fi
