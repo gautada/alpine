@@ -4,25 +4,21 @@
 
 This container is the base image that uses Alpine Linux as the intial image for other containers as such it's primary purpose is to provide functionalityservices for other downstream containers.
 
-## Services
+## Features
 
-- Entrypoint: A stacked collection of startup scripts that launch supporting services for the running container but still provide a mechanism for cli command execution.
+- **Entrypoint**: A stacked collection of startup scripts that launch supporting services for the running container but still provide a mechanism for cli command execution.
 - *DROP THIS* Exitpoint: Similar to entry pointbut on container application exit.
-- Healthcheck: A drop-in based system to stack all the needed checks for reporting container health including liveness and readiness.
-- Sudo: Tightly controlled access to privilege escalation through a stacked collection
-- Backup: A customizable container backup solution that defines a daily full backup and manages an hourly delta mechanism. 
-- Timezones: This and all downstream containers are set to the same timezone
-- Schedular: A time based esecution schedular for container self management
-- Environment Profile: A stackable mechanism for CLI environment and porfile definitions
-- Tools: A defined set of tools that help with container debugging and manipulation.
+- **Healthcheck**: A drop-in based system to stack all the needed checks for reporting container health including liveness and readiness.
+- **Sudo**: Tightly controlled access to privilege escalation through a stacked collection
+- **Backup**: A customizable container backup solution that defines a daily full backup and manages an hourly delta mechanism. 
+- **Timezones**: This and all downstream containers are set to the same timezone
+- **Users**: A standard user definition
+- **Scheduler**: A time based esecution schedular for container self management
+- **Environment Profile**: A stackable mechanism for CLI environment and porfile definitions
+- **Version**: A stanrdway to get the version of the system being run.
+- **Tools**: A defined set of tools that help with container debugging and manipulation.
 
-## Versions
-
-- April 30, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.15 .4](https://git.alpinelinux.org/aports/log/?h=v3.15.4)
-- May 31, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.16.0](https://git.alpinelinux.org/aports/log/?h=v3.16.0)
-- September 8, 2022 [alpine](https://alpinelinux.org/releases/) - Active version is [3.16.2](https://git.alpinelinux.org/aports/log/?h=v3.16.0)
-
-## Notes
+## Details
 
 ### Entrypoint
 This container provides the `/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The `/entrypoint` script call the subsequent scripts in the `/etc/entrypoint.d` drop-in folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`.
@@ -47,21 +43,76 @@ RUN echo "America/New_York" > /etc/timezone
 ```
 
 ### User
-Each downstream image should co figure their own downstream default user in the `Containerfile`
-```
-ARG USER=postgres
-VOLUME /opt/$USER
-RUN /bin/mkdir -p /opt/$USER \
- && /usr/sbin/addgroup $USER \
- && /usr/sbin/adduser -D -s /bin/ash -G $USER $USER \
- && /usr/sbin/usermod -aG wheel $USER \
- && /bin/echo "$USER:$USER" | chpasswd \
- && /bin/chown $USER:$USER -R /opt/$USER /etc/backup /var/backup /tmp/backup /opt/backup
-USER $USER
-WORKDIR /home/$USER
-```
+Each downstream image should co figure their own downstream default user in the `Containerfile`. Refer to the [gist](https://gist.github.com/gautada/bd71914073b8e3a89ad13f0320b33010) for reference on implementation.
 
 ### Version
 This the operating system container defines two version [aliases](https://linuxhandbook.com/linux-alias-command/) (`osversion` and `cversion`)
 - **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
 - **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
+
+## Development
+
+## Testing
+
+## Deploy
+
+## Architecture
+
+### Context
+
+{![Context Diagram(Link to image)}
+
+### Container
+
+{![Container Diagram(Link to image)}
+
+### Components
+
+{![Component Diagram(Link to image)}
+
+## Administration
+
+### Checklist
+
+- [ X ] README conforms to the [gist](https://gist.github.com/gautada/ec549c846e8e50daf355d01b06eb0665)
+- [ X ] .gitignore conforms to the [gist](https://gist.github.com/gautada/3a0a4a76d3c7e4539e71fc02c7f599ad)
+- [ X ] Confirm the drone.yml file
+- [ ] Volume folders are present (development-volume & backup-volume)
+- [ ] docker-compose(.yml) works
+- [ ] Manifest folder present (and origin to private repository is correct
+- [ ] Issue List is linked to proper URI
+- [ ] Signoff ({date and signature of last check})
+- [ ] Confirm backup (maybe add to testing layer)
+- [ ] Confirm healthcheck (maybe add to testing layer)
+- [ ] Regenerate all architecture images
+
+
+### Issues
+
+The official to list is kept in a [GitHub Issue List]{(https://github.com/gautada/alpine/issues)}
+
+## Notes
+
+
+
+
+
+
+
+
+
+
+
+
+## Development
+
+All container services should move to docker-compose for their build environments but for systems that need to **bootstrap** to get up and running the following is a template for manually getting things running.
+
+### Build
+
+docker build --build-arg ALPINE_VERSION=3.16.2 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
+
+### Run
+
+
+

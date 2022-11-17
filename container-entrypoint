@@ -1,0 +1,85 @@
+#!/bin/ash
+#
+# [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint) is the default
+# initial process which and executes all the applications and services that run in a container.
+#
+# This is the default ENTRYPOINT located at `/usr/sbin/entrypoint` and should be 
+# augmented when used in downstream containers by over writting the `/etc/container/entrypoint` 
+# file (which by default is a symlink to `/mnt/volumes/container/entrypoint`
+#
+
+ENTRYPOINT_PARAMS="$@"
+. /etc/profile
+
+log "-i" "entrypoint" "Start alpine($(osversion)-$(/usr/bin/whoami))"
+
+ENTRYPOINT_FUNCTION="/etc/container/entrypoint"
+
+# if [ ! -f $ENTRYPOINT_FUNCTION ] ; then
+#  echo "[ERROR] No entrypint function($ENTRYPOINT_FUNCTION)"
+#  return 1
+# fi
+
+log "-i" "entrypoint" "Clean duplicity"
+/bin/rm -rvf /mnt/volumes/backup/duplicity*
+
+log "-i" "entrypoint" "Start crond"
+/usr/bin/pgrep crond > /dev/null
+RTN=$?
+if [ $RTN -eq 1 ] ; then
+ /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /dev/null
+ RTN=$?
+ if [ $RTN -ne 0 ] ; then
+  log "-i" "entrypoint" "Application (crond) failed to start"
+  return 3
+ fi
+else
+ log "-e" "entrypoint" "Application(crond) already started"
+ return 2
+fi
+/usr/bin/pgrep crond > /dev/null
+RTN=$?
+ if [ $RTN -ne 0 ] ; then
+   log "-e" "entrypoint" "Application (crond) failed to start"
+  return 4
+ fi
+ 
+RTN=0
+if [ -f "/etc/container/entrypoint" ] ; then
+ log "-i" "entrypoint" "Call container entrypoint"
+ /etc/container/entrypoint $ENTRYPOINT_PARAMS
+ RTN=$?
+ if [ $RTN -ne 0 ] ; then
+   log "-i" "entrypoint" "Container entrypoint failed"
+  return 5
+ fi
+fi
+
+# else
+#  if [ -L "/etc/container.d/container-entrypoint" && -e "/etc/container.d/container-entrypoint" ] ; then
+#   echo "---------- [ Container(symlink) ] ----------"
+#   /etc/container/entrypoint $ENTRYPOINT_PARAMS
+#   RTN=$?
+#  fi
+# fi
+
+
+
+if [ ! -z "$ENTRYPOINT_PARAMS" ] ; then
+ log "-i" "entrypoint" "Execute command"
+ echo "- - - - - - - - - - - - - - - - - - - -"
+ exec $ENTRYPOINT_PARAMS
+ RTN=$?
+ echo "- - - - - - - - - - - - - - - - - - - -"
+ return $RTN
+else
+  log "-i" "entrypoint" "No command - block with crond"
+  # Kill the background crond and restart with the forground service.  Crond is the default
+  # container process.
+  /usr/bin/pgrep /usr/sbin/crond > /dev/null
+  RTN=$?
+  if [ $? -eq 0 ] ; then
+   /usr/bin/sudo /usr/bin/killall crond
+  fi
+  /usr/bin/sudo /usr/sbin/crond -f -l 0
+fi

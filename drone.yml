@@ -25,3 +25,8 @@ steps:
    - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
    - podman push docker.io/$DOCKERIO_USERNAME/alpine:$ALPINE_VERSION
    - podman push docker.io/$DOCKERIO_USERNAME/alpine:latest
+
+trigger:
+  branch:
+  - main
+  
