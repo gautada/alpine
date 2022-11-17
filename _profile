@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# _profile: The `/etc/profile` file provides system-wide environment variables. This
+#           script loads base environment variables for ALL containers and calls
+#           container specific variables. Order is maintained using the alphabetical
+#           order of the symlinks in `/etc/profile.d/`
+#
+#
+# author: adam@gautier.org
+# date: 2022-11-16
+# component: environment
+#
+# - - - - - - - - - - - - - - - - - - - - - - -
+
+alias osversion='cat /etc/alpine-release'
+
+
+

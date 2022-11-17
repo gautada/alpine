@@ -70,7 +70,6 @@ Rel("_backup", "container_volume", "symlink")
 
 
 ---
-
 @startuml COMPONENT_CONTAINER_STATUS
 !include <C4/C4.puml>
 !include <C4/C4_Context.puml>
@@ -91,9 +90,9 @@ Boundary("etc", "etc Folder", "/etc") {
   Component("startup_check", "Startup Check Function File", "/etc/container/startup-check")
  }
 }
-Rel("startup_check", "health_check", "symlink")
-Rel("readiness_check", "health_check", "symlink")
-Rel("liveness_check", "health_check", "symlink")
+Rel("startup_check", "health_check", "symlink[dev]")
+Rel("readiness_check", "health_check", "symlink[dev]")
+Rel("liveness_check", "health_check", "symlink[dev]")
 
 Rel("containerfile", "health_check", "COPY")
 Rel("containerfile", "liveness_check", "COPY")
@@ -113,13 +112,12 @@ Rel("container_liveness_check", "container_status_check", "symlink")
 Rel("container_readiness_check", "container_status_check", "symlink")
 Rel("container_startup_check", "container_status_check", "symlink")
 
-Rel("container_status_check", "health_check", "calls[conditional]")
-Rel("container_status_check", "liveness_check", "calls[conditional]")
-Rel("container_status_check", "readiness_check", "calls[conditional]")
-Rel("container_status_check", "startup_check", "calls[conditional]")
+Rel("container_status_check", "health_check", "conditional calls")
+Rel("container_status_check", "liveness_check", "conditional calls")
+Rel("container_status_check", "readiness_check", "conditional calls")
+Rel("container_status_check", "startup_check", "conditional calls")
 
 Rel("containerfile", "container_status_check", "COPY[rare]")
-
 Boundary("mnt", "mnt Folder", "/mnt") {
  Boundary("volumes", "volumes Mount Point", "/mnt/volumes") {
   Boundary("container", "container Volume", "/mnt/volumes/container") {
@@ -128,6 +126,96 @@ Boundary("mnt", "mnt Folder", "/mnt") {
  }
 }
 
-Rel("health_check", "healthcheck", "calls[dev]")
+Rel("health_check", "healthcheck", "symlink[dev]")
+@enduml
 
+
+
+
+
+---
+@startuml COMPONENT_CONTAINER_PROFILE
+!include <C4/C4.puml>
+!include <C4/C4_Context.puml>
+!include <C4/C4_Container.puml>
+!include <C4/C4_Component.puml>
+!include <C4/C4_Dynamic.puml>
+!include <C4/C4_Deployment.puml>
+
+title "Component Diagram - Container - Profile"
+
+Component_Ext("containerfile", "Containerfile", "OCI Container file")
+
+Boundary("etc", "etc Folder", "/etc") {
+ Boundary("container_configuration", "Container Configuration Folder", "/etc/container") {
+  Component("profile", "Profile Function File", "/etc/container/profile")
+ }
+ Boundary("profile_dropin", "profile Drop-In Folder", "/etc/profile.d") {
+  Component("container_profile", "Container Profile File", "/etc/profile.d/container-profile")
+ }
+}
+
+Rel("container_profile", "profile", "call")
+Rel("containerfile", "profile", "COPY")
+Rel("containerfile", "container_profile", "COPY[once]")
+@enduml
+
+
+
+---
+@startuml COMPONENT_CONTAINER_BACKUP
+!include <C4/C4.puml>
+!include <C4/C4_Context.puml>
+!include <C4/C4_Container.puml>
+!include <C4/C4_Component.puml>
+!include <C4/C4_Dynamic.puml>
+!include <C4/C4_Deployment.puml>
+
+title "Component Diagram - Container - Backup"
+
+Component_Ext("containerfile", "Containerfile", "OCI Container file")
+
+Boundary("etc", "etc Folder", "/etc") {
+ Boundary("container_configuration", "Container Configuration Folder", "/etc/container") {
+  Component("backup_function", "Backup Function File", "/etc/container/backup")
+  Component("backup_key", "Backup Key File", "/etc/container/backup.key")
+ }
+}
+
+Boundary("var", "var Folder", "/var") {
+ Component("var_backup", "(Cache)backup Folder", "/var/backup")
+}
+
+Boundary("tmp", "tmp Folder", "/tmp") {
+ Component("tmp_backup", "(Working)backup Folder", "/tmp/backup")
+}
+
+
+Boundary("usr", "usr Folder", "/usr") {
+ Boundary("bin", "bin Folder", "/usr/bin") {
+  Component("container_backup", "Container Backup Script", "/usr/bin/container-backup")
+ }
+}
+
+
+Boundary("usr", "usr Folder", "/usr") {
+ Boundary("bin", "bin Folder", "/usr/bin") {
+  Component("container_backup", "Container Backup Script", "/usr/bin/container-backup")
+ }
+}
+
+Boundary("mnt", "mnt Folder", "/mnt") {
+ Boundary("volumes", "volumes Folder", "/usr/volumes") {
+  Boundary("configmaps", "configmaps Folder", "/mnt/volumes/configmaps") {
+   Component("configmap_backup_key", "Configmap Backup Key", "/mnt/volumes/configmaps/backup.key")
+  }
+  Boundary("container_volume", "container Volume", "/mnt/volumes/container") {
+   Component("container_volume_backup_key", "Development Backup Key", "/mnt/volumes/container/backup.key")
+  }
+  Component("volume_backup", "Backup Volume", "/mnt/volumes/backup")
+ }
+}
+
+Rel("configmap_backup_key", "container_volume_backup_key", "symlink")
+Rel("backup_key", "configmap_backup_key", "symlink")
 @enduml

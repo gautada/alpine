@@ -70,21 +70,6 @@ if [ "$FAIL" == $TARGET ] ; then
 fi
 
 RTN=0
-# - - - - - - - - - - - - - - - - - - - - - - - - -
-# DEFAULT STATUS CHECK (Alpine Base Container)
-#
-
-# Check - crond daemon - running is healthy
-CMD=/usr/bin/pgrep /usr/bin/coredns
-$(CMD) > /dev/null
-RTN=$?
-if [ $RTN -eq 1 ] ; then
- echo "[ERROR] Failed the default health check($CMD)"
- return 1
-fi
-
-#
-# - - - - - - - - - - - - - - - - - - - - - - - - -
 
 CMD=$FAIL
 if [ -f $TARGET ] ; then

@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# backup: Defines the container backup function which should build the local cache to be backed up.
+
+container_backup() {
+ echo "[ WARN] Container backup function not customized for container"
+ date > $(date +%s)~
+ return 0
+}

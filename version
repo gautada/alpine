@@ -1,12 +1,17 @@
-#!/bin/ash
+#!/bin/sh
 #
-# This is a simple script to initialize the profile and allows for
-# `version` to return the container to work from the docker cli
+# version: This is a simple script to initialize the profile and allows for
+#          `version` to return the container to work from the docker cli
 #
-for script in /etc/profile.d/*.sh ; do
-    if [ -r "$script" ] ; then
-        . "$script"
-    fi
-done
-unset script
+# author: adam@gautier.org
+# date: 2022-11-17
+# component: version
+#
+# - - - - - - - - - - - - - - - - - - - - - - -
+
+type cversion > /dev/null
+RTN=$?
+if [ $RTN -ne 0 ] ; then
+ . /etc/profile
+fi
 cversion

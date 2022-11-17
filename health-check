@@ -1,10 +1,11 @@
 #!/bin/sh
 #
-# health-check: This is the default status check. Unless overridden all status checks
-#               [health|liveness|readiness|startup] should end up here. This script 
-#               should be overidden by downstream containers or by providing a volume 
-#               that has `status-check` script.  This script will return a 1 by default
-#               if the script is not found.
+# health-check: This is the default health check. All checks should default to
+#               script.  This script attempts to call the base status check at
+#               `/etc/container/status-check` and optionally tries to call
+#               `/mnt/volumes/container/status-check` if the file exists to allow for
+#               runtime checks to be defined.  Runtime status-check should only be used in
+#               development.
 # 
 # author: adam@gautier.org
 # date: 2022-11-16
@@ -12,16 +13,20 @@
 #
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-DEFAULT_STATUS_CHECK="/mnt/volumes/container/status-check"
+STATUS_CHECK="/etc/container/status-check"
 
-if [ ! -f $DEFAULT_STATUS_CHECK ] ; then
- echo "[ERROR] Unable to find default status check($DEFAULT_STATUS_CHECK) script"
+if [ ! -f $STATUS_CHECK ] ; then
+ echo "[ERROR] Unable to find default status check($STATUS_CHECK) script"
  return 1
 fi
 
-exec $DEFAULT_STATUS_CHECK
+exec $STATUS_CHECK
 RTN=$?
 if [ $RTN -ne 0 ] ; then
- echo "[ERROR] Invalid status($RTN) check($DEFAULT_STATUS_CHECK)"
+ return $RTN
 fi
-return $RTN
+
+RUNTIME_STATUS_CHECK="/mnt/volumes/container/status-check"
+
+exec $RUNTIME_STATUS_CHECK
+return $?
