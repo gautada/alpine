@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 
 FOLDER_HEALTHCHECK_DROPIN="/etc/container/healthcheck.d"
 if [ ! -d $FOLDER_HEALTHCHECK_DROPIN ] ; then

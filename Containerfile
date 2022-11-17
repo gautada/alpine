@@ -18,46 +18,46 @@ LABEL description="Alpine Linux base container."
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-RUN /bin/mkdir -p /etc/container.d \
- && /bin/ln -svf /mnt/volumes/container/container-entrypoint /etc/container.d/container-entrypoint 
-COPY entrypoint /usr/bin/entrypoint
-ENTRYPOINT ["/usr/bin/entrypoint"]
+# RUN /bin/mkdir -p /etc/container.d \
+#  && /bin/ln -svf /mnt/volumes/container/container-entrypoint /etc/container.d/container-entrypoint 
+# COPY entrypoint /usr/bin/entrypoint
+# ENTRYPOINT ["/usr/bin/entrypoint"]
 
 # ╭――――――――――――――――――――╮
 # │ PROFILE            │
 # ╰――――――――――――――――――――╯
-ENV ENV="/etc/profile"
-COPY container-profile /etc/container.d/container-profile
-RUN /bin/ln -svf /etc/container.d/container-profile /etc/profile.d/container-profile \
- && /bin/chmod +x /etc/container.d/container-profile
+# ENV ENV="/etc/profile"
+# COPY container-profile /etc/container.d/container-profile
+# RUN /bin/ln -svf /etc/container.d/container-profile /etc/profile.d/container-profile \
+#  && /bin/chmod +x /etc/container.d/container-profile
 
 # ╭――――――――――――――――――――╮
 # │ VERSION            │
 # ╰――――――――――――――――――――╯
-COPY version /usr/bin/version
-RUN /bin/chmod +x /usr/bin/version
+# COPY version /usr/bin/version
+# RUN /bin/chmod +x /usr/bin/version
 
 # ╭――――――――――――――――――――╮
 # │ BACKUP             │
 # ╰――――――――――――――――――――╯
-COPY container-backup /etc/container/backup
-COPY backup /usr/bin/backup
-RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup \
- && ln -s /usr/bin/backup /etc/periodic/hourly/backup \
- && ln -s /mnt/volumes/backup/backup-encryption.key /etc/container/backup-encryption.key
+# COPY container-backup /etc/container/backup
+# COPY backup /usr/bin/backup
+# RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup \
+#  && ln -s /usr/bin/backup /etc/periodic/hourly/backup \
+#  && ln -s /mnt/volumes/backup/backup-encryption.key /etc/container/backup-encryption.key
 
 
 # ╭――――――――――――――――――――╮
 # │ VOLUMES            │
 # ╰――――――――――――――――――――╯
-RUN /bin/mkdir -p /mnt/volumes/backup /mnt/volumes/configmaps /mnt/volumes/container 
+# RUN /bin/mkdir -p /mnt/volumes/backup /mnt/volumes/configmaps /mnt/volumes/container 
 
 
 
 
-RUN mkdir /etc/container/configmap.d /etc/container/keys.d
-USER root
-WORKDIR /
+# RUN mkdir /etc/container/configmap.d /etc/container/keys.d
+# USER root
+# WORKDIR /
 
 
  
@@ -83,7 +83,7 @@ HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /usr
 RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-ncat shadow sudo tzdata wget
 
 # ╭――――――――――――――――――――╮
-# │ SUDO               │
+# │ PRIVILEGE          │
 # ╰――――――――――――――――――――╯
 # Create the container-wheel chain destination >> container config >> container volume
 # Downstream should break the the chain by copying a wheel file to /etc/container/wheel
