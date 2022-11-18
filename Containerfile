@@ -24,7 +24,13 @@ RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup /mnt/volumes/confi
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
  && ln -fsv /mnt/volumes/container/backup.key /mnt/volumes/configmaps/backup.key \
  && ln -fsv /mnt/volumes/configmaps/backup.key /etc/container/backup.key
- 
+
+# ╭――――――――――――――――――――╮
+# │ DEVELOPMENT        │
+# ╰――――――――――――――――――――╯
+# Uncommend to test the .dockerignore build context [Reference](https://www.geeksforgeeks.org/how-to-use-a-dockerignore-file/)
+# COPY . /build-context
+
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
@@ -40,6 +46,7 @@ COPY _profile /etc/container/.profile
 COPY profile /etc/container/profile
 RUN /bin/ln -fsv /etc/container/.profile /etc/profile.d/base-profile.sh
 RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
+
 
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
