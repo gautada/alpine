@@ -7,7 +7,6 @@ This container is the base image that uses Alpine Linux as the intial image for 
 ## Features
 
 - **Entrypoint**: A stacked collection of startup scripts that launch supporting services for the running container but still provide a mechanism for cli command execution.
-- *DROP THIS* Exitpoint: Similar to entry pointbut on container application exit.
 - **Healthcheck**: A drop-in based system to stack all the needed checks for reporting container health including liveness and readiness.
 - **Sudo**: Tightly controlled access to privilege escalation through a stacked collection
 - **Backup**: A customizable container backup solution that defines a daily full backup and manages an hourly delta mechanism. 
@@ -21,11 +20,11 @@ This container is the base image that uses Alpine Linux as the intial image for 
 ## Details
 
 ### Entrypoint
-This container provides the `/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The `/entrypoint` script call the subsequent scripts in the `/etc/entrypoint.d` drop-in folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`.
+This container provides the `/usr/bin/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The **entrypoint** script calla the subsequent scripts in the `/etc/entrypoint.d` drop-in folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`. Should considered using [s6](https://skarnet.org/software/s6/overview.html) or [supervisor.d](http://supervisord.org).
 
 ### Healthcheck
 By default this image provides a method for checking the running health of a container. The script `/usr/sbin/container-healthcheck` runs all subscripts in the healthcheck drop-in folder
-`/etc/container/healthcheck.d`. Healthchecks are generally considered to be cummulative. Downstream images should add more healthchecks using the `Containerfile` via `COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh`
+`/etc/container/healthcheck.d`. Healthchecks are generally considered to be cummulative. Downstream images should add more healthchecks using the `Containerfile` via `COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh`. Should consider [Probe Common Pitfalls](https://loft.sh/blog/kubernetes-liveness-probes-examples-and-common-pitfalls/). Down stream containers will need to include [--format=docker](https://github.com/gautada/alpine-container/issues/15) flag to parse the `HEALTHCHECK` tag.
 
 ### Profile 
 The default profile for Alpine is the `ash` shell.  This is configured as default using `ENV ENV="/etc/profile"` in the `Containerfile`. Usually to customize just add scripts `/etc/profile.d` folder
@@ -49,6 +48,9 @@ Each downstream image should co figure their own downstream default user in the 
 This the operating system container defines two version [aliases](https://linuxhandbook.com/linux-alias-command/) (`osversion` and `cversion`)
 - **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
 - **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
+
+### Tools
+Look at the software installed in the container.
 
 ## Development
 
@@ -93,6 +95,10 @@ The official to list is kept in a [GitHub Issue List]{(https://github.com/gautad
 
 ## Notes
 
+- Lookup if an [exitpoint](https://github.com/gautada/alpine-container/issues/19) can be worked in via a script in `/etc/profile`.
+- Bastion service was an access mechanism that allowed for ssh access.  This was dropped in favor of `docker exec`.
+- Log rotate is a way to limit the size of logs for long running container.  The containers should log everything to /dev/stdout.
+- Scripts - Maybe use `set -xe` for debugging. See: [The Set Builtin](https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin). I think this might only be for bash
 
 
 
@@ -110,9 +116,13 @@ All container services should move to docker-compose for their build environment
 
 ### Build
 
+```
 docker build --build-arg ALPINE_VERSION=3.16.2 --file Containerfile --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:build .
+```
 
 ### Run
 
-
+```
+docker run -it --rm --name drone --publish 8080:8080 --volume=/Users/mada/Workspace/drone/development-volume:/opt/drone --volume=/Users/mada/Workspace/drone/backup-volume:/opt/drone drone:build /bin/ash
+```
 
