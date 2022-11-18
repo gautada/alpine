@@ -29,7 +29,7 @@ RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup /mnt/volumes/confi
 # │ DEVELOPMENT        │
 # ╰――――――――――――――――――――╯
 # Uncommend to test the .dockerignore build context [Reference](https://www.geeksforgeeks.org/how-to-use-a-dockerignore-file/)
-# COPY . /build-context
+COPY . /.context
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │

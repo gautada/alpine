@@ -7,6 +7,9 @@
 # Desktop Services Store - Custom view preferences
 .DS_Store
 
+# All .git files are ignored this is mainly for .dockerignore.
+**.git/
+
 # **Volume Folders** are used in development to set runtime data, usuaully 
 # this is private data and should almost **NEVER** be loaded into version
 # control
