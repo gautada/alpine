@@ -66,7 +66,9 @@ Look at the software installed in the container.
 
 ### Container
 
-{![Container Diagram(Link to image)}
+![Container Diagram(https://plantuml.com/plantuml/svg/dLDBRzim3BxxLwZ6WCI07vUSXdL1cnZheTk2PUqEHH4eDcSBbIL1eeCQMVxxv4ViEa4wOBwOvFSGHK9NJ2IyJ85yMioYnInKPS4_ErVZwcOX1S8hleDI9a1Vn0ib1OXB-cKbQC6IIoWeBgjYa3iJqlLZew3zRBHVLmQX-1DRI2lD36mEjx8KATNLb796ZKyutGBtoNwEbOA3J-P8Crl-m9buyQp72hIHOh-9N_5mefcdO19j_yPw8vnhs-F_HzjTg1dXSANcKdtzr14XoSM_kseikkcVMNVrpZeCmrRm0pX59eN9cNghQMKMdQBqoMyj2vyqnxUofyMCh3WL-F3r_dcQ8ohpCOfKNR5h2mocd6t3Z65URaCcxMg38psoCq2678ZRNvWi6SqqBKX0RhYo5TTn-dLEaYDjufC9RV1Wg7baxxmPdRkboKkfN9-ujyUe6T2rUsopQokHHPJH4cbAexHKd2KCgy7OzKQsTdQwKf89hAtZ8HlJSg0SyvforqPZs2vknpXaK3DMVJ8cbSQURl47SzQ5IN98IzxYwpuvRNN7j1JrAsfx7T8nSMTVWDrzJNhimZ41fUIcXdysWUSS76Tzz_tNvZx-4dzRJhs_)
+
+**Note:** See HEALTHCHECK note below.
 
 ### Components
 
@@ -99,6 +101,7 @@ The official to list is kept in a [GitHub Issue List]{(https://github.com/gautad
 - Bastion service was an access mechanism that allowed for ssh access.  This was dropped in favor of `docker exec`.
 - Log rotate is a way to limit the size of logs for long running container.  The containers should log everything to /dev/stdout.
 - Scripts - Maybe use `set -xe` for debugging. See: [The Set Builtin](https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin). I think this might only be for bash
+- HEALTHCHECK is a complicated issue.  A discussed in the [OCI's image spec](https://github.com/opencontainers/image-spec/issues/749) project. This is an container instance issue not an image specification.  This note is just here for future reference and should be documented in the architecture.
 
 
 
