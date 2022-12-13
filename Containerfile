@@ -22,8 +22,8 @@ COPY container-backup /usr/bin/container-backup
 COPY backup /etc/container/backup
 RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup /mnt/volumes/configmaps \
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
- && ln -fsv /mnt/volumes/container/backup.key /mnt/volumes/configmaps/backup.key \
- && ln -fsv /mnt/volumes/configmaps/backup.key /etc/container/backup.key
+ && ln -fsv /mnt/volumes/container/backup.cer /mnt/volumes/configmaps/backup.cer \
+ && ln -fsv /mnt/volumes/configmaps/backup.cer /etc/container/backup.cer
 
 # ╭――――――――――――――――――――╮
 # │ DEVELOPMENT        │
