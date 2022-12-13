@@ -36,25 +36,25 @@ else
 fi
 
 # Load and/or confirm the key is loaded
-BACKUP_CER="/etc/container/backup.cer"
+BACKUP_CERT="/etc/container/backup.crt"
 
-if [ ! -f $BACKUP_CER ] ; then
- echo "[ERROR] Unable to find the backup certificae($BACKUP_CERT)"
+if [ ! -f $BACKUP_CERT ] ; then
+ echo "[ERROR] Unable to find the backup certificate($BACKUP_CERT)"
  return 2
 else
  if  [ -L $TARGET ] ; then
   if [ ! -e $TARGET ] ; then # Symlink is not correct
-   echo "[ERROR] Unable to find backup key target"
+   echo "[ERROR] Unable to find backup cert target"
    return 3
   fi
  fi
 fi
 
-KEY_FINGERPRINT="$(/usr/bin/gpg --show-keys $BACKUP_CER | sed -n '2p' | xargs)"
+KEY_FINGERPRINT="$(/usr/bin/gpg --show-keys $BACKUP_CERT | sed -n '2p' | xargs)"
 echo "[ INFO] Fingerprint: $KEY_FINGERPRINT"
 if [ "" == "$(/usr/bin/gpg --list-keys)" ] ; then
  echo "[ INFO] Importing key"
- /usr/bin/gpg --trusted-key $KEY_FINGERPRINT --import $BACKUP_CER
+ /usr/bin/gpg --trusted-key $KEY_FINGERPRINT --import $BACKUP_CERT
 else
  echo "[ INFO] List keys"
  /usr/bin/gpg --list-keys
