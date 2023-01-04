@@ -6,6 +6,7 @@ ARG ALPINE_VERSION=3.16.2
 # │                                                                           │
 # ╰―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
 FROM alpine:$ALPINE_VERSION
+RUN /bin/mkdir -p /etc/container && /sbin/apk list > /etc/container/original.apk
 
 # ╭――――――――――――――――――――╮
 # │ METADATA           │
@@ -52,6 +53,7 @@ RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
 RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-ncat shadow sudo tzdata wget
+RUN /sbin/apk list > /etc/container/alpine.apk
 
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
