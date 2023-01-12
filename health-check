@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# health-check: This is the default health check. All checks should default to
+# health-check: This is the default health-check. All checks should default to
 #               script.  This script attempts to call the base status check at
 #               `/etc/container/status-check` and optionally tries to call
 #               `/mnt/volumes/container/status-check` if the file exists to allow for
@@ -13,7 +13,7 @@
 #
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-STATUS_CHECK="/etc/container/status-check"
+STATUS_CHECK="/usr/bin/container-status-check"
 
 if [ ! -f $STATUS_CHECK ] ; then
  echo "[ERROR] Unable to find default status check($STATUS_CHECK) script"
@@ -26,7 +26,7 @@ if [ $RTN -ne 0 ] ; then
  return $RTN
 fi
 
-RUNTIME_STATUS_CHECK="/mnt/volumes/container/status-check"
-
-exec $RUNTIME_STATUS_CHECK
-return $?
+# RUNTIME_STATUS_CHECK="/mnt/volumes/container/status-check"
+# 
+# exec $RUNTIME_STATUS_CHECK
+# return $?

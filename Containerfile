@@ -41,11 +41,9 @@ ENTRYPOINT ["/usr/bin/container-entrypoint"]
 
 # ╭――――――――――――――――――――╮
 # │ ENVIRONMENT        │
-# ╰――――――――――――――――――――╯
+# ╰――――――――――――――――――――
 ENV ENV="/etc/profile"
-COPY _profile /etc/container/.profile
 COPY profile /etc/container/profile
-RUN /bin/ln -fsv /etc/container/.profile /etc/profile.d/base-profile.sh
 RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
 
 
@@ -85,7 +83,7 @@ RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN /bin/echo "America/New_York" > /etc/timezone
 
 # ╭――――――――――――――――――――╮
-# │ VERSION            │
+# │VERSION            │
 # ╰――――――――――――――――――――╯
 COPY version /usr/bin/container-version
 

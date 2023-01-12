@@ -9,9 +9,4 @@
 #
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-type cversion > /dev/null
-RTN=$?
-if [ $RTN -ne 0 ] ; then
- . /etc/profile
-fi
-cversion
+cat /etc/alpine-release
