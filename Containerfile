@@ -17,15 +17,23 @@ LABEL maintainer="Adam Gautier <adam@gautier.org>"
 LABEL description="Alpine Linux base container."
 
 # ╭――――――――――――――――――――╮
+# │ VOLUMES            │
+# ╰――――――――――――――――――――╯
+RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container /mnt/volumes/backup
+
+# ╭――――――――――――――――――――╮
 # │ BACKUP             │
 # ╰――――――――――――――――――――╯
+RUN /sbin/apk add --no-cache bind-tools duplicity
 COPY container-backup /usr/bin/container-backup
 COPY backup /etc/container/backup
-RUN /bin/mkdir -p /var/backup /tmp/backup /mnt/volumes/backup /mnt/volumes/configmaps \
+RUN /bin/mkdir -p /var/backup /tmp/backup \
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
- && ln -fsv /mnt/volumes/container/backup.crt /mnt/volumes/configmaps/backup.crt \
- && ln -fsv /mnt/volumes/configmaps/backup.crt /etc/container/backup.crt
-
+ && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
+ && ln -fsv /mnt/volumes/configmaps/signer.key /etc/container/signer.key \
+ && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/configmaps/encrypter.key \
+ && ln -fsv /mnt/volumes/configmaps/encrypter.key /etc/container/encrypter.key
+             
 # ╭――――――――――――――――――――╮
 # │ DEVELOPMENT        │
 # ╰――――――――――――――――――――╯
@@ -50,7 +58,7 @@ RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache bind-tools curl duplicity iputils nano nmap nmap-ncat shadow sudo tzdata wget
+RUN /sbin/apk add --no-cache bind-tools curl iputils nano nmap nmap-ncat shadow sudo tzdata wget py3-requests
 RUN /sbin/apk list > /etc/container/alpine.apk
 
 # ╭――――――――――――――――――――╮
@@ -64,16 +72,15 @@ RUN /bin/ln -fsv /etc/container/.wheel /etc/sudoers.d/_wheel \
 # │ STATUS             │
 # ╰――――――――――――――――――――╯
 # Conforms to the status component design.
+COPY container-health-check /usr/bin/container-health-check
 COPY container-status-check /usr/bin/container-status-check
-COPY health-check /etc/container/health-check
-COPY status-check /etc/container/status-check
-RUN /bin/ln -fsv /usr/bin/container-status-check /usr/bin/container-health-check \
- && /bin/ln -fsv /usr/bin/container-status-check /usr/bin/container-liveness-check \
- && /bin/ln -fsv /usr/bin/container-status-check /usr/bin/container-readiness-check \
- && /bin/ln -fsv /usr/bin/container-status-check /usr/bin/container-startup-check \
- && /bin/ln -fsv /etc/container/health-check /etc/container/liveness-check \
- && /bin/ln -fsv /etc/container/health-check /etc/container/readiness-check \
- && /bin/ln -fsv /etc/container/health-check /etc/container/startup-check 
+COPY alpine-latest-stable-version /usr/bin/alpine-latest-stable-version
+RUN /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-liveness-check \
+ && /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-readiness-check \
+ && /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-startup-check
+COPY alpine-latest-stable-version /usr/bin/alpine-latest-stable-version
+# COPY alsv-updater /usr/bin/alsv-updater
+# RUN /bin/ln -fsv /usr/bin/alsv-updater /etc/periodic/monthly/alsv-updater
 HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /usr/bin/container-health-check
 
 # ╭――――――――――――――――――――╮
@@ -87,10 +94,6 @@ RUN /bin/echo "America/New_York" > /etc/timezone
 # ╰――――――――――――――――――――╯
 COPY version /usr/bin/container-version
 
-# ╭――――――――――――――――――――╮
-# │ VOLUMES            │
-# ╰――――――――――――――――――――╯
-RUN /bin/mkdir -p /mnt/volumes/backup /mnt/volumes/configmaps /mnt/volumes/container
 
 
 

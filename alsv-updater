@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "_ALSV=$(/usr/bin/alpine-latest-stable-version $(uname -m))" > /etc/container/.alsv

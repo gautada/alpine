@@ -9,8 +9,12 @@
 #
 # - - - - - - - - - - - - - - - - - - - - - - -
 
+
+
 alias osversion='cat /etc/alpine-release'
 alias version='/usr/bin/container-version'
+
+# echo "_ALSV=$(osversion)" > /etc/container/.alsv
 
 log() {
  DEBUG="[D]"
