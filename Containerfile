@@ -21,10 +21,10 @@ LABEL description="Alpine Linux base container."
 # ╰――――――――――――――――――――╯
 RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container /mnt/volumes/backup
 
-# ╭――――――――――――――――――――╮
-# │ BACKUP             │
+# ╭―――――――――――――――――――╮
+# │ BACKUP            │
 # ╰――――――――――――――――――――╯
-RUN /sbin/apk add --no-cache bind-tools duplicity
+RUN /sbin/apk add --no-cache duplicity
 COPY container-backup /usr/bin/container-backup
 COPY backup /etc/container/backup
 RUN /bin/mkdir -p /var/backup /tmp/backup \
@@ -32,8 +32,12 @@ RUN /bin/mkdir -p /var/backup /tmp/backup \
  && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
  && ln -fsv /mnt/volumes/configmaps/signer.key /etc/container/signer.key \
  && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/configmaps/encrypter.key \
- && ln -fsv /mnt/volumes/configmaps/encrypter.key /etc/container/encrypter.key
-             
+ && ln -fsv /mnt/volumes/configmaps/encrypter.key /etc/container/encrypter.key \
+ && ln -fsv /mnt/volumes/container/validator.key /mnt/volumes/configmaps/validator.key \
+ && ln -fsv /mnt/volumes/configmaps/validator.key /etc/container/validator.key \
+ && ln -fsv /mnt/volumes/container/decrypter.key /mnt/volumes/configmaps/decrypter.key \
+ && ln -fsv /mnt/volumes/configmaps/decrypter.key /etc/container/decrypter.key 
+
 # ╭――――――――――――――――――――╮
 # │ DEVELOPMENT        │
 # ╰――――――――――――――――――――╯
@@ -68,9 +72,9 @@ COPY _wheel /etc/container/.wheel
 RUN /bin/ln -fsv /etc/container/.wheel /etc/sudoers.d/_wheel \
  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
 
-# ╭――――――――――――――――――――╮
-# │ STATUS             │
-# ╰――――――――――――――――――――╯
+# ╭――――――――――――――――――╮
+# │STATUS             │
+# ╰――――――――――――――――――╯
 # Conforms to the status component design.
 COPY container-health-check /usr/bin/container-health-check
 COPY container-status-check /usr/bin/container-status-check

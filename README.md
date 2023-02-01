@@ -24,8 +24,17 @@ This container provides the `/usr/bin/entrypoint` script and sets the `ENTRYPOIN
 
 ### Healthcheck
 
-By default this image provides a method for checking the running health of a container. The script `/usr/sbin/container-healthcheck` runs all subscripts in the healthcheck drop-in folder
-`/etc/container/healthcheck.d`. Healthchecks are generally considered to be cummulative. Downstream images should add more healthchecks using the `Containerfile` via `COPY hc-crond.sh /etc/container/healthcheck.d/hc-crond.sh`. Should consider [Probe Common Pitfalls](https://loft.sh/blog/kubernetes-liveness-probes-examples-and-common-pitfalls/). Down stream containers will need to include [--format=docker](https://github.com/gautada/alpine-container/issues/15) flag to parse the `HEALTHCHECK` tag.
+Containers run within a container enviroment which may provide a health status/probe to determine the 
+current running state of the container.  This root container provides the default mechanism to support such 
+a probe as defined in [Reference Architecture - Kubernetes Health 
+Probe](https://github.com/gautada/celsus/blob/main/references/K8sHealthProbes.md). Downstream containers 
+must provide a custom `/usr/bin/container-status-check` which overrides the default script provided here.  
+To provide customized 
+
+- To override the specific probe scripts (liveness, readiness, startup) just use the `COPY` command to 
+overwrite the symlinks. 
+- Should consider [Probe Common Pitfalls](https://loft.sh/blog/kubernetes-liveness-probes-examples-and-common-pitfalls/).
+- Downstream build scripts will need to include [--format=docker](https://github.com/gautada/alpine-container/issues/15) flag to parse the `HEALTHCHECK` tag.
 
 
 
