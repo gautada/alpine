@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# backup: Defines the container backup function which should build the local cache to be backed up.
+# backup: This script defines the default backup mechanism function and should be overloaded by downstream controls
 
 container_backup() {
  echo "[ INFO] Current directory($(PWD))"
  echo "[ WARN] Container backup function not customized for container"
- date > $(date +%s)~
- return 0
+ /bin/cp -r /mnt/volumes/container/* /tmp/backup
+ return $?
 }
