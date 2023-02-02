@@ -85,7 +85,9 @@ RUN /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-liveness-che
 COPY alpine-latest-stable-version /usr/bin/alpine-latest-stable-version
 # COPY alsv-updater /usr/bin/alsv-updater
 # RUN /bin/ln -fsv /usr/bin/alsv-updater /etc/periodic/monthly/alsv-updater
-HEALTHCHECK --interval=10m --timeout=60s --start-period=5m --retries=10 CMD /usr/bin/container-health-check
+HEALTHCHECK --interval=5s --timeout=5s --start-period=1s --retries=3 CMD /bin/cat /tmp/healthy
+/usr/bin/container-health-check
+# touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600
 
 # ╭――――――――――――――――――――╮
 # │ TIMEZONES          │
