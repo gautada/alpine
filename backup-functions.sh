@@ -2,7 +2,7 @@
 
 gpg_passphrase() {
  FINGERPRINT="$1"
- PASSPHRASE="$(env | grep $FINGERPRINT | awk -F '=' '{print $2}')"
+ PASSPHRASE="$(/usr/bin/env | /bin/grep _$FINGERPRINT | /usr/bin/awk -F '=' '{print $2}')"
  if [ -z $PASSPHRASE ] ; then
    if [ -f "/mnt/volumes/container/$FINGERPRINT" ] ; then
     PASSPHRASE="$(/bin/cat /mnt/volumes/container/$FINGERPRINT)"
@@ -77,7 +77,8 @@ duplicity_clean() {
 }
 
 duplicity_backup() {
- TYPE="$1"
+ TYPE="$(echo $1 | /usr/bin/tr '[:upper:]' '[:lower:]')"
+ FULL="full"
  NAME="$2"
  SOURCE="$3"
  CACHE="$4"
@@ -88,11 +89,11 @@ duplicity_backup() {
  echo "[ INFO]: Signer=$SIGNER_FINGERPRINT"
  ENCRYPTER_FINGERPRINT="$(load_gpg_key encrypter.key)"
  echo "[ INFO]: Encrypter: $ENCRYPTER_FINGERPRINT"
- if [ $TYPE == "full" ] ; then
+ if [ "$TYPE" == "$FULL" ] ; then
   echo "[ INFO]: Clean backup cache($CACHE)"
   /bin/rm -frv $CACHE
   echo "[ INFO]: Clean backup target($TARGET)"
-  /bin/rm -frv /mnt/v olumes/backup/duplicity*
+  /bin/rm -frv $TARGET/duplicity*
  fi
  env SIGN_PASSPHRASE="$(gpg_passphrase $SIGNER_FINGERPRINT)" /usr/bin/duplicity $TYPE --encrypt-key $ENCRYPTER_FINGERPRINT --sign-key $SIGNER_FINGERPRINT --name $NAME --archive-dir $ARCHIVE $SOURCE "file:/$TARGET"
 }
