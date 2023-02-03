@@ -20,8 +20,8 @@ ENTRYPOINT_FUNCTION="/etc/container/entrypoint"
 #  return 1
 # fi
 
-log "-i" "entrypoint" "Clean duplicity"
-/bin/rm -rvf /mnt/volumes/backup/duplicity*
+# log "-i" "entrypoint" "Clean duplicity"
+# /bin/rm -frv /var/backup/duplicity
 
 log "-i" "entrypoint" "Start crond"
 /usr/bin/pgrep crond > /dev/null

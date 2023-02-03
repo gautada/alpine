@@ -2,100 +2,48 @@
 #
 # container-backup: Controller script for container wide back-up
 
+. /etc/profile
+
 SOURCE="/tmp/backup"
 ARCHIVE="/var/backup"
+NAME="duplicity"
+CACHE="$ARCHIVE/$NAME"
 TARGET="/mnt/volumes/backup"
 
-
-# Load the backup function
-BACKUP_FUNCTION="container_backup"
-. /etc/container/backup
-if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
- echo "[ INFO]: Backup function($BACKUP_FUNCTION) loaded."
-else
- echo "[ERROR]: Unable to find the backup function($BACKUP_FUNCTION)"
- return 1
-fi
-
-load_gpg_key() {
- KEY_FILE="$1"
- if [ ! -f $KEY_FILE ] ; then
-  echo "[ERROR] Unable to find the backup certificate($BACKUP_CERT)"
-  return 1
+run_backup() {
+ echo "[ INFO]: Clean old backups"
+ MANIFEST="$(duplicity_clean $SOURCE $CACHE $TARGET)"
+ echo "Manifest: $MANIFEST"
+ 
+ # Determine if full or incremental
+ if [ ! -f $MANIFEST ] ; then
+  echo "[ INFO]: FULL backup(No Manifest)"
+  duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
+ else
+  # RESET BACKUP CHAIN - At midnight
+  if [ "00" == "$(date --utc +%H)" ] ; then
+   echo "[ INFO]: FULL backup(Daily 00)"
+   duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
+  else
+   TIMESTAMP_LAST=$(date --utc +%s -r $MANIFEST)
+   echo "Last: $TIMESTAMP_LAST"
+   TIMESTAMP_NOW=$(date --utc +%s)
+   echo "Now: $TIMESTAMP_NOW"
+   TIMESTAMP_DAY=86400
+   TIMESTAMP_DELTA=$(($TIMESTAMP_NOW-$TIMESTAMP_LAST))
+   echo "Delta: $TIMESTAMP_DELTA ($TIMESTAMP_DAY)"
+   # RESET BACKUP CHAIN - If older than 24 hours
+   if [ $TIMESTAMP_DAY -lt $TIMESTAMP_DELTA ] ; then
+    echo "[ INFO]: FULL backup(Timestamp)"
+    duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
+   else # INCREMENTAL BACKUP
+    echo "[ INFO]: INCREMENTAL backup"
+    duplicity_backup "incr" $NAME $SOURCE $CACHE $TARGET
+   fi
+  fi
  fi
- FINGERPRINT="$(/usr/bin/gpg --show-keys $KEY_FILE | sed -n '2p' | xargs)"
- echo "Fingerprint: $FINGERPRINT"
- KEYCHAIN="$(/usr/bin/gpg --list-keys)"
- # if [ ! [$KEYCHAIN =~ $FINGERPRINT] ] ; then
-  echo "" | /usr/bin/gpg --trusted-key $FINGERPRINT --import $KEY_FILE
- # fi
 }
 
-
-generate_hashmap() {
- hashmap="$(/usr/bin/find $1 -type f -exec /usr/bin/sha256sum {} \; | /usr/bin/sort | /usr/bin/sha256sum |  awk '{print $1}')"
- echo $hashmap
-}
-
-
-# Load and/or confirm the signer and key is loaded
-load_gpg_key "/etc/container/signer.key"
-load_gpg_key "/etc/container/encrypter.key"
-
-generate_hashmap "/mnt/volumes/container"
-
-# Execute backup
-BACKUP_TAG="$(date --utc +%H)"
-
-
-# 
-# 
-# Collect backup material
-# /bin/mkdir -p $FOLDER_WORK
-# if [ ! -d $FOLDER_WORK] ; then
-#  echo "[ INFO]: Execute the container backup function"
-#  cd $FOLDER_WORK
-#  container_backup # Call backup function
-#  RTN=$?
-#  if [ $RTN -ne 0 ] ; then
-#   echo "[ERROR]: Function($RTN) did not work"
-#   return $RTN
-#  fi
-# fi
-# cd /
-# Clear all but the latest chain
-# echo "[ INFO]: Clean up backups"
-# /usr/bin/duplicity remove-all-but-n-full 1 --force file://$FOLDER_DEST
-# FILE_MANIFEST="$FOLDER_DEST/duplicity-full.*.manifest.gpg"
-
-# Backup $FOLDER_WORK -> $FOLDER_CACHE -> $FOLDER_DEST
-# Determine if full or incremental
-# if [ ! -f $FILE_MANIFEST ] ; then
-#  echo "[ INFO]: FULL backup(No Manifest)"
-#  /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK 
-# file://$FOLDER_DEST
-# else
-#    # RESET BACKUP CHAIN - At midnight
-#  if [ "00" == "$(date --utc +%H)" ] ; then
-#   echo "[ INFO]: FULL backup(Daily 00)"
-#   /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK 
-# file://$FOLDER_DEST
-#  else
-#   TIMESTAMP_LAST=$(date --utc +%s -r $FILE_MANIFEST)
-#   TIMESTAMP_NOW=$(date --utc +%s)
-#   TIMESTAMP_DAY=86400
-#   TIMESTAMP_DELTA=$(($TIMESTAMP_NOW-$TIMESTAMP_LAST))
-#   # RESET BACKUP CHAIN - If older than 24 hours
-#   if [ $TIMESTAMP_DAY -lt $TIMESTAMP_DELTA ] ; then
-#    echo "[ INFO]: FULL backup(Timestamp)"
-#      /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK 
-# file://$FOLDER_DEST
-#   else # INCREMENTAL BACKUP
-#    echo "[ INFO]: INCREMENTAL backup"
-#    /usr/bin/duplicity incr --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK 
-# file://$FOLDER_DEST
-#   fi
-#  fi
-# fi
-# echo "[ INFO]: Clean working folder $FOLDER_WORK"
-# rm -rvf $FOLDER_WORK/*
+create_backup_source $SOURCE
+run_backup
+clean_backup_source $SOURCE

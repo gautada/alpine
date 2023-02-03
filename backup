@@ -2,9 +2,8 @@
 #
 # backup: This script defines the default backup mechanism function and should be overloaded by downstream controls
 
-container_backup() {
- echo "[ INFO] Current directory($(PWD))"
- echo "[ WARN] Container backup function not customized for container"
- /bin/cp -r /mnt/volumes/container/* /tmp/backup
- return $?
-}
+echo "[ INFO] Current directory($(/bin/pwd))"
+echo "[ INFO] Container backup script"
+/bin/cp -rv /mnt/volumes/container/* /tmp/backup
+echo "$(date +%s)" > /tmp/backup/.date
+return $?

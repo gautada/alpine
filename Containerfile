@@ -26,7 +26,8 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container /mnt/volumes/ba
 # ╰――――――――――――――――――――╯
 RUN /sbin/apk add --no-cache duplicity
 COPY container-backup /usr/bin/container-backup
-COPY backup /etc/container/backup
+# COPY backup /etc/container/backup
+COPY backup-functions.sh /etc/profile.d/backup-functions.sh
 RUN /bin/mkdir -p /var/backup /tmp/backup \
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
  && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
@@ -85,8 +86,7 @@ RUN /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-liveness-che
 COPY alpine-latest-stable-version /usr/bin/alpine-latest-stable-version
 # COPY alsv-updater /usr/bin/alsv-updater
 # RUN /bin/ln -fsv /usr/bin/alsv-updater /etc/periodic/monthly/alsv-updater
-HEALTHCHECK --interval=5s --timeout=5s --start-period=1s --retries=3 CMD /bin/cat /tmp/healthy
-/usr/bin/container-health-check
+HEALTHCHECK --interval=10m --timeout=1m --start-period=5m --retries=10 CMD /usr/bin/container-health-check
 # touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600
 
 # ╭――――――――――――――――――――╮
