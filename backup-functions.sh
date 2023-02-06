@@ -4,8 +4,11 @@ gpg_passphrase() {
  FINGERPRINT="$1"
  PASSPHRASE="$(/usr/bin/env | /bin/grep _$FINGERPRINT | /usr/bin/awk -F '=' '{print $2}')"
  if [ -z $PASSPHRASE ] ; then
-   if [ -f "/mnt/volumes/container/$FINGERPRINT" ] ; then
-    PASSPHRASE="$(/bin/cat /mnt/volumes/container/$FINGERPRINT)"
+  if [ -f "/mnt/volumes/container/$FINGERPRINT" ] ; then
+   PASSPHRASE="$(/bin/cat /mnt/volumes/container/$FINGERPRINT)"
+  fi
+  if [ -f "/mnt/volumes/secrets/$FINGERPRINT" ] ; then
+   PASSPHRASE="$(/bin/cat /mnt/volumes/secrets/$FINGERPRINT)"
   fi
  fi
  echo $PASSPHRASE
@@ -14,7 +17,7 @@ gpg_passphrase() {
 load_gpg_key() {
  KEY_FILE="/etc/container/$1"
  if [ ! -f $KEY_FILE ] ; then
-  echo "[ERROR] Unable to find the backup certificate($BACKUP_CERT)"
+  echo "[ERROR] Unable to find the backup certificate($KEY_FILE)"
   return 1
  fi
  FINGERPRINT="$(/usr/bin/gpg --show-keys $KEY_FILE | sed -n '2p' | xargs)"
@@ -43,7 +46,13 @@ create_backup_source() {
  /bin/mkdir -p $SOURCE
  cd $SOURCE
  if [ -f /etc/container/backup ] ; then
-  exec /etc/container/backup
+   if /usr/bin/id -u 1001 > /dev/null 2>&1; then
+    USRNAME=$(/usr/bin/id -un 1001)
+    /bin/su $USERNAME -c /etc/container/backup
+   else
+    echo "No downstream user found."
+    exec /etc/container/backup
+   fi
  else
   default_container_backup # Call default backup function
  fi

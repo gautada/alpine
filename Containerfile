@@ -19,7 +19,7 @@ LABEL description="Alpine Linux base container."
 # ╭――――――――――――――――――――╮
 # │ VOLUMES            │
 # ╰――――――――――――――――――――╯
-RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container /mnt/volumes/backup
+RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container /mnt/volumes/backup /mnt/volumes/secrets
 
 # ╭―――――――――――――――――――╮
 # │ BACKUP            │
@@ -31,9 +31,9 @@ COPY backup-functions.sh /etc/profile.d/backup-functions.sh
 RUN /bin/mkdir -p /var/backup /tmp/backup \
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
  && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
- && ln -fsv /mnt/volumes/configmaps/signer.key /etc/container/signer.key \
- && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/configmaps/encrypter.key \
- && ln -fsv /mnt/volumes/configmaps/encrypter.key /etc/container/encrypter.key \
+ && ln -fsv /mnt/volumes/secrets/signer.key /etc/container/signer.key \
+ && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/secrets/encrypter.key \
+ && ln -fsv /mnt/volumes/secrets/encrypter.key /etc/container/encrypter.key \
  && ln -fsv /mnt/volumes/container/validator.key /mnt/volumes/configmaps/validator.key \
  && ln -fsv /mnt/volumes/configmaps/validator.key /etc/container/validator.key \
  && ln -fsv /mnt/volumes/container/decrypter.key /mnt/volumes/configmaps/decrypter.key \
@@ -69,8 +69,12 @@ RUN /sbin/apk list > /etc/container/alpine.apk
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
 # ╰――――――――――――――――――――╯
-COPY _wheel /etc/container/.wheel
-RUN /bin/ln -fsv /etc/container/.wheel /etc/sudoers.d/_wheel \
+# COPY _wheel /etc/container/.wheel
+# RUN /bin/ln -fsv /etc/container/.wheel /etc/sudoers.d/_wheel \
+#  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
+ 
+COPY container-wheel /etc/container/container-wheel
+RUN /bin/ln -fsv /etc/container/container-wheel /etc/sudoers.d/container-wheel \
  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
 
 # ╭――――――――――――――――――╮

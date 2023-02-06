@@ -45,9 +45,13 @@ overwrite the symlinks.
 ### Profile 
 The default profile for Alpine is the `ash` shell.  This is configured as default using `ENV ENV="/etc/profile"` in the `Containerfile`. Usually to customize just add scripts `/etc/profile.d` folder
 
-### Sudo
-To allow for super user access the container uses a wheel mechanism.  This requires the 
-default user to be part of the `wheel` group via `/usr/sbin/usermod -aG wheel $USER`. To enable super user access to members of the `wheel` group, a wheel defintion file (wheel-[name]) must be provided that defines a sudo access line (i.e. `%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/container-backup`). The wheel definition file should be loaded into the wheel drop-in folder in the `Containerfile` via `COPY wheel-backup /etc/container/wheel.d/wheel-backup`.
+### Privilege
+
+This feature allows for sudo access to specifc applications.  This mechanism uses the a `wheel` group mechanism which requires the default user to be part of the `wheel` group via `/usr/sbin/usermod -aG wheel $USER`. To enable super user access to members of the `wheel` group, a wheel defintion file (wheel-[name]) must be provided that defines a sudo access line (i.e. `%wheel         ALL = (ALL) NOPASSWD: /usr/sbin/container-backup`). The wheel definition file should be loaded into the wheel drop-in folder in the `Containerfile` via `COPY wheel-backup /etc/container/wheel.d/wheel-backup`.
+
+**Note: ** The `/etc/sudoers.d/` drop-in folder mechanism does not support any files witj a `.` in the name.  So no `filename.ext` filenames.
+
+![Container Diagram - Privilege](https://www.plantuml.com/plantuml/svg/fLH_Rzis4FrVdu8p1im2RAjft7OjXgQeRNG3qYveMkoFOL1fwIGJeqY1FpORZh_xZf9rIZmboB8W2Cd7U--TZdTvPnqtpbSo-aweJFeSs4-BURAOpse4tvwYwK8h1rltm2qN2iozzrMj5QZx-CkTufN8xhk5MkfTrTEZ7zZ-UcSTL3ShJClKHbX83--rLpatkp6NWji9atmDSiBs5svNms72BXml4VvU2lLdZ1fNOAnM-tIrTOSJpaKEDZEuMjHsy2ykieyLmTsq_S5TczHJ595CHMmbIPJm_N9zi-3P1cu63Hna6_MerEavJfm8_tzE5xtJPv3S2QtiHjHaHdxxz-A04VjVL0xRiGX_RyQ5qHK-bjDFyVka7TZE25U5PpRwiX6MuIzlpYF6BLDdU1juQCIoEGC9rHj4sLlMV6oZzljYpguaL-xhnyi_nXldQlicIUg0O1zEhSkbMCzAuJP-FHCQUtNQXITnu7yGrh4lK275GQzG8jpHCbqb9VUEvpmvM_ENFxxWvwzVl7fLdFEN6N_z39wVh-VFYxDdvsUyqLnjEUg1lPMGDwOqlAg4AcTI591aDidcqoxH-67Do0adiKhKPsmfUD1ZKtPbn5z2GWcZAABn6lsz0P1fQRIlHnFM7iEcHMAsZuwpDHvv2oPSVJskIoYubuvbPDP4nD7XjW6uB0GdnxNGCWVJ2bEFZaVMvnfjCEBs5fKBKORTHpHWtyBLDzQYtZJTo0eX0JrPxvWRNGlLcIP7lLb-Qj_xusHW3YbzI4fb86ZQGl40ZO8f10l0xbIWbwQq2BatBTH-H4PKfk4dQO9OyvgixZhWRWb7yLrJqXqmMFnNuGDsmyaxemwji8NCExwM44whvWGMPQgAgzo6yRQ-he-zDM4uPxQtGuEXOeMMe6G9E2qKNbZK0qOyb8i-W-mwdRAalCAUp7CAFpKc_YBu-T8WCnu8fHe_CfQ0T9ZLfaDPTqLyy0k8SMlwIBZqA3mGr4_OfUOvHJmuG3rqlQl2VsjYqSL0H1HT__phR-dbwiFgqt8SH-z0vRwI_m00)
 
 ### Timezone
 By default the timezone is set to US/New York a.k.a US/Eastern.  This provides consistency across containers.
