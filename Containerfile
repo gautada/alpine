@@ -1,10 +1,10 @@
 ARG ALPINE_VERSION=3.16.2
 
-# ╭――――――――――――――――---------------------------------------------------------――╮
-# │                                                                           │
-# │ STAGE 1: alpine-container                                                 │
-# │                                                                           │
-# ╰―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
+# ╭――――――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
+# │                                                                            │
+# │ STAGE 1: alpine-container                                                  │
+# │                                                                            │
+# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
 FROM alpine:$ALPINE_VERSION
 RUN /bin/mkdir -p /etc/container && /sbin/apk list > /etc/container/original.apk
 
@@ -26,19 +26,23 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container /mnt/volumes/ba
 # ╰――――――――――――――――――――╯
 RUN /sbin/apk add --no-cache duplicity
 COPY container-backup /usr/bin/container-backup
-# COPY backup /etc/container/backup
+COPY backup /etc/container/backup
 COPY backup-functions.sh /etc/profile.d/backup-functions.sh
 RUN /bin/mkdir -p /var/backup /tmp/backup \
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
- && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
- && ln -fsv /mnt/volumes/secrets/signer.key /etc/container/signer.key \
- && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/secrets/encrypter.key \
- && ln -fsv /mnt/volumes/secrets/encrypter.key /etc/container/encrypter.key \
+ && ln -fsv /mnt/volumes/secrets/validator.key /etc/container/validator.key \
+ && ln -fsv /mnt/volumes/configmaps/validator.key /mnt/volumes/secrets/validator.key \
  && ln -fsv /mnt/volumes/container/validator.key /mnt/volumes/configmaps/validator.key \
- && ln -fsv /mnt/volumes/configmaps/validator.key /etc/container/validator.key \
- && ln -fsv /mnt/volumes/container/decrypter.key /mnt/volumes/configmaps/decrypter.key \
- && ln -fsv /mnt/volumes/configmaps/decrypter.key /etc/container/decrypter.key 
-
+ && ln -fsv /mnt/volumes/secrets/signer.key /etc/container/signer.key \
+ && ln -fsv /mnt/volumes/configmaps/signer.key /mnt/volumes/secrets/signer.key \
+ && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
+ && ln -fsv /mnt/volumes/secrets/encrypter.key /etc/container/encrypter.key \
+ && ln -fsv /mnt/volumes/configmaps/encrypter.key /mnt/volumes/secrets/encrypter.key \
+ && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/configmaps/encrypter.key \
+ && ln -fsv /mnt/volumes/secrets/decrypter.key /etc/container/decrypter.key \
+ && ln -fsv /mnt/volumes/configmaps/decrypter.key /mnt/volumes/secrets/decrypter.key \
+ && ln -fsv /mnt/volumes/container/decrypter.key /mnt/volumes/configmaps/decrypter.key
+ 
 # ╭――――――――――――――――――――╮
 # │ DEVELOPMENT        │
 # ╰――――――――――――――――――――╯

@@ -1,14 +1,25 @@
 #!/bin/ash
 
+# cd /etc/container
+# ln -s /mnt/volumes/container/25A745C637A473049CA85A008CF08A96C02ED55D
+# gpg_passphrase 25A745C637A473049CA85A008CF08A96C02ED55D
+
+#  env SIGN_PASSPHRASE="$(gpg_passphrase $SIGNER_FINGERPRINT)" /usr/bin/duplicity $TYPE --encrypt-key $ENCRYPTER_FINGERPRINT --sign-key $SIGNER_FINGERPRINT --name $NAME --archive-dir $ARCHIVE $SOURCE "file:/$TARGET"
+
 gpg_passphrase() {
  FINGERPRINT="$1"
  PASSPHRASE="$(/usr/bin/env | /bin/grep _$FINGERPRINT | /usr/bin/awk -F '=' '{print $2}')"
  if [ -z $PASSPHRASE ] ; then
-  if [ -f "/mnt/volumes/container/$FINGERPRINT" ] ; then
-   PASSPHRASE="$(/bin/cat /mnt/volumes/container/$FINGERPRINT)"
-  fi
   if [ -f "/mnt/volumes/secrets/$FINGERPRINT" ] ; then
    PASSPHRASE="$(/bin/cat /mnt/volumes/secrets/$FINGERPRINT)"
+  else
+   if [ -f "/etc/container/$FINGERPRINT" ] ; then
+    PASSPHRASE="$(/bin/cat /etc/container/$FINGERPRINT)"
+   else
+    if [ -f "/mnt/volumes/container/$FINGERPRINT" ] ; then
+     PASSPHRASE="$(/bin/cat /mnt/volumes/container/$FINGERPRINT)"
+    fi
+   fi
   fi
  fi
  echo $PASSPHRASE
@@ -32,29 +43,38 @@ generate_hashmap() {
  echo $hashmap
 }
 
-default_container_backup() {
- echo "[ INFO] Current directory($(/bin/pwd))"
- echo "[ WARN] Default container backup function not customized for container"
- /bin/cp -rv /mnt/volumes/container/* /tmp/backup
- echo "$(date +%s)" > /tmp/backup/.date
- return $?
-}
+# container_backup() {
+#  echo "[ INFO] Current directory($(/bin/pwd))"
+#  echo "[ WARN] Default container backup function not customized for container"
+#  /bin/cp -rv /mnt/volumes/container/* /tmp/backup
+#  return $?
+# }
+ 
+if [ -f "/etc/container/backup" ] ; then
+ . /etc/container/backup
+fi
 
 create_backup_source() {
  SOURCE="$1"
  # Collect backup material
  /bin/mkdir -p $SOURCE
  cd $SOURCE
- if [ -f /etc/container/backup ] ; then
-   if /usr/bin/id -u 1001 > /dev/null 2>&1; then
-    USRNAME=$(/usr/bin/id -un 1001)
-    /bin/su $USERNAME -c /etc/container/backup
-   else
-    echo "No downstream user found."
-    exec /etc/container/backup
-   fi
+ # if [ -f /etc/container/backup ] ; then
+ #   if /usr/bin/id -u 1001 > /dev/null 2>&1; then
+ #    USRNAME=$(/usr/bin/id -un 1001)
+ #    /bin/su $USERNAME -c /etc/container/backup
+ #   else
+ #    echo "No downstream user found."
+ #    exec /etc/container/backup
+ #   fi
+ # else
+ #  default_container_backup # Call default backup function
+ # fi
+ if /usr/bin/id -u 1001 > /dev/null 2>&1; then
+  USRNAME=$(/usr/bin/id -un 1001)
+  /bin/su $USERNAME -c container_backup
  else
-  default_container_backup # Call default backup function
+  container_backup
  fi
  RTN=$?
  if [ $RTN -ne 0 ] ; then
@@ -106,5 +126,4 @@ duplicity_backup() {
  fi
  env SIGN_PASSPHRASE="$(gpg_passphrase $SIGNER_FINGERPRINT)" /usr/bin/duplicity $TYPE --encrypt-key $ENCRYPTER_FINGERPRINT --sign-key $SIGNER_FINGERPRINT --name $NAME --archive-dir $ARCHIVE $SOURCE "file:/$TARGET"
 }
-
 
