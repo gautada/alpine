@@ -6,10 +6,10 @@ This container is the base image that uses Alpine Linux as the intial image for 
 
 ## Features
 
+- **Backup**: A customizable container backup solution that defines a daily full backup and manages an hourly delta mechanism. 
 - **Entrypoint**: A stacked collection of startup scripts that launch supporting services for the running container but still provide a mechanism for cli command execution.
 - **Healthcheck**: A drop-in based system to stack all the needed checks for reporting container health including liveness and readiness.
 - **Sudo**: Tightly controlled access to privilege escalation through a stacked collection
-- **Backup**: A customizable container backup solution that defines a daily full backup and manages an hourly delta mechanism. 
 - **Timezones**: This and all downstream containers are set to the same timezone
 - **Users**: A standard user definition
 - **Scheduler**: A time based esecution schedular for container self management
@@ -19,13 +19,15 @@ This container is the base image that uses Alpine Linux as the intial image for 
 
 ## Details
 
+### Backup
+![Container Diagram - Backup](https://www.plantuml.com/plantuml/png/hLLXRzis4FtkNy4Pm-O0JfJ4JheMGzF6zhfYMLl42V9X60oAEbk4AL8WAI-Uu_--esI9aYCNGTSWiCZZlNjtxuxIEsEfjbaYEZzmoKGM0VbrD0n6mvCKZM_thREHaXOUxLTEAPUW3vudgP8W3-77QqaJpWwTGYhKEl7mpizaCrqR2ydJH5hGgUO6PjjhbSc8wdMF2avDdmWQWkYJpPLTfx3jaojB5sZ-KN2vFC8ONq0R9JUpoQFTxc6k8Z1CuzDWR0lFi8ZUAOAhu-8FLqLItn8HmPM8FgGBwksRSVWqeYo6frO22ooMBqgzQaUJoTl_7zELPxe5GIrNqiGyzMGbt-QQRz5Zyr56yDZZxlUfDzSgmMPPzIrydvG5KnBXK-AUTEzYRWZ-qtpV9TGGUOQd3eT4X0q924ZUe9My9NcnURI_HaFoHL1fx_-y-RiNMvkQDq6GEWlEuR6naU3XoOBRE0jFkC9PFIxTWoE7_y2D9NUG8CI2Zx10SmbZAWaMDBCqei5PI2z_kQ23rnUlNiq7z9BHrwTmFWY7v_Epqy4PpMDE7Yd60rDBADDweMcISBau4NmE0JC16nwNYHvzFMR7SYjGfMhEo9XJ5uySaslAbbdQxNptuUXKuNfTffMCkdtCe5p08p2K91JWTbFaYZ81kekuwf9tmJ9t6koUSoKYvq8s7UATOfLfiIxzWXGqLn5dWRVNSRv8B0qpcx5IarbOAD6lwtHTsR1KdbgtAcp40RKIf3Z0nCcsdXOUp_cYIgkYEPmGrYkPNgUsS9gK6_8756Lm0RK3hYH9ir1mHfReSDGCPVXYHpPrgsOGRyNEhQY5jWY57BDv9fdZgbN-cpTvMMgY5KXI8NDfjlN6XZm71vdHWLitDQbdyTtQquWQPIdgncqkoTXl6dFfOtaZ2gRSnS5usqwz8flaQGJu37ochKMDGsoFoZGh6b6jN6kCMzpBSX0Ymjmr96fEybDYrKxTF05Flw8wfyVdI-YfPZ5VGQDwyjuR7Mk-k4FodJE9k0PcbSP9QNRJ4mQ9jC5AYIm1yv8yBDKBi3bHkV8oJ2eHg8n8Fj1HDLlEgSZZ5aJnTJdj4_-YQRdN_ZNZa0WxSFlRR3TSBX5KSPsr-xLTcezofPPWwkZpTay_5DSP5r43CcWdR4xoY0hHG0ttFJp5BT0cmyMURtr8yez1m_jotzktya5pMtJGZ_5Fk_wLmZUW_brrRy2qkFX8-rvjcfHtSII0IkU8dwBAoxtqVMZV_sSl0dG4BQaWbGknCRN4h2MBjPByNp2au3H4pUU6Mq0kVoleFxa6xn-cP2HK5f4fw1LdXJAcM3-x4aL-OSQMXPRJWVj4Lrj_yBbW916rb6X8bU7LrKHX3jRespJrXI3gCCQpxcCwqzy_Fynk9XycdyQzeyuxa56MYFy0)
+![Component Diagram - Backup](https://www.plantuml.com/plantuml/svg/jLPjRzis4FxkNy4P0sO3IPGNfrsBeUbYUrsnh0toiduO1eEcpZOHYXH8oh3WvB-FegAJc2dgqBX54P5tzppFyOulVcyirJPBHEy7Bfd8OY2_Z4VHU7IGEkExfzRPM4aB6zlXfLo2VjQVf4g2V0u_oILDE7lE2wbGULB3Up-HxNLkB2JtKvUMJZKtC7iuLvcCgSu7L71gzeYWSn1xP7jcynGUziYPfKjd_b5mUJTq79UWZPBRsNHZ7vvWpc8mJBklSTmM_eDrwCUAkD5--S-DogI-XT61iOX8MPAYVJkPtuyfMy5zgu05jfB_AtLiHwXKsr-cT5OhNO6WbYjfLZn5CTJRdlC75x7zA6FO37Znztwmq2fnpRBgM_G-AGl6VIi5wUQaVxFYXhZ_rC_xX1eYZvotm3aXmaO412HldPMy8twndktlyOXS2YhjxPyN_mnMrgRcRHIbXILBnBwniU3pWoMtgsn-m9NRg_jLU3Giy1-uiUG64WUnK3CidRc2CPL4IvfP6jFeQ4vV_NnAJzwSldwzEA6l67rp2CSdyz7nukZmv8Xwpkc6EZumZOGohPUQ9WcNomF15n0n4x7HVfNei9kpPxaLhagupyY4quAFx9DpokwojD_R-UP0ja4_pbB16RTvVu_q9yq9R82voim55BCo5r8RIQfLaMS_e6DQoRY87rU3aERQPHvd0hI3zV3AwC-vBBnHPdJqE5ue4HTXPDiZJO6gJhDvMPszPktEqUQMprFRoBm0QYL8wN3o3yq4LYhJ8lSvW6LH2fghcBC8xUtvk1wud6RVAIcRU5JalX4IToPIHiqMcMJ5mMye_OQcbZHA647OC2YvSJLWPVTmjE02J36uTJ5Cvwc5cB1YNnAr8DvBh7eazkkgbxMcsY_BVJkNvSMfPYk-Xc1tabzhOw7f1pTE-Z6On5m3iqhdJoiAbc6FiMaTwjNQVCoqcf0_8A-Aq72uof4qcxiSoPqB28iOGuDf0grCwF1Ccg-fXHOgmvUFML_xKK22rWw2DHKyfbPvZh-gIK0JE9vTrCwscsjIUCONV9dGyXpXPDXev2o8YH9fexKIMG8cGe_vocbXoMnN_KN2dRKP6L_ORUHvKTE3GrHVTosrHqztwNTT-PqNVaTrts7PyQeCIlxr6zHIlGJhhqWSuVKznSkRofZuDSTuFdsGp-8AHFapyT1Xy8rlUVVmXVT8X1qvHqjmsmNoKQxLNOW-BhHQGkk7wJpZ8Wum9-sAuU-TCHKYG8s2Y43Y2cYeSFeqjYxq5yrjjOJMdopLqpuMG2K6jjMp5Nt1vPq3ULIOGt2iRWqc4KRvFdU7uBkBCRrIhwrdRSsvr6gJOvBDl8AB5vTJf9KdmWsnRa_2M3SAwm6X5CwxfK8OJZkbi8x1HTqXqW3uSJTzS7U4LtYNI0Z3QQTKy9pEWjddDMZYTtGnIrLiKc0EUFtxvo-pY-c7wQV9ODXx3pBE4l4l)
+
 ### Entrypoint
 This container provides the `/usr/bin/entrypoint` script and sets the `ENTRYPOINT` value in the **Containerfile**. The **entrypoint** script calla the subsequent scripts in the `/etc/entrypoint.d` drop-in folder.  These scripts start the container services and optionally executes the container processes.  If not overload by CLI parameter or entrypoint script, the default process is `crond`. Should considered using [s6](https://skarnet.org/software/s6/overview.html) or [supervisor.d](http://supervisord.org).
 
-### Backup
-
-![Container Diagram - Backup](https://www.plantuml.com/plantuml/svg/jLPjRzis4FxkNy4P0sO3IPGNfrsBeUbYUrsnh0toiduO1eEcpZOHYXH8oh3WvB-FegAJc2dgqBX54P5tzppFyOulVcyirJPBHEy7Bfd8OY2_Z4VHU7IGEkExfzRPM4aB6zlXfLo2VjQVf4g2V0u_oILDE7lE2wbGULB3Up-HxNLkB2JtKvUMJZKtC7iuLvcCgSu7L71gzeYWSn1xP7jcynGUziYPfKjd_b5mUJTq79UWZPBRsNHZ7vvWpc8mJBklSTmM_eDrwCUAkD5--S-DogI-XT61iOX8MPAYVJkPtuyfMy5zgu05jfB_AtLiHwXKsr-cT5OhNO6WbYjfLZn5CTJRdlC75x7zA6FO37Znztwmq2fnpRBgM_G-AGl6VIi5wUQaVxFYXhZ_rC_xX1eYZvotm3aXmaO412HldPMy8twndktlyOXS2YhjxPyN_mnMrgRcRHIbXILBnBwniU3pWoMtgsn-m9NRg_jLU3Giy1-uiUG64WUnK3CidRc2CPL4IvfP6jFeQ4vV_NnAJzwSldwzEA6l67rp2CSdyz7nukZmv8Xwpkc6EZumZOGohPUQ9WcNomF15n0n4x7HVfNei9kpPxaLhagupyY4quAFx9DpokwojD_R-UP0ja4_pbB16RTvVu_q9yq9R82voim55BCo5r8RIQfLaMS_e6DQoRY87rU3aERQPHvd0hI3zV3AwC-vBBnHPdJqE5ue4HTXPDiZJO6gJhDvMPszPktEqUQMprFRoBm0QYL8wN3o3yq4LYhJ8lSvW6LH2fghcBC8xUtvk1wud6RVAIcRU5JalX4IToPIHiqMcMJ5mMye_OQcbZHA647OC2YvSJLWPVTmjE02J36uTJ5Cvwc5cB1YNnAr8DvBh7eazkkgbxMcsY_BVJkNvSMfPYk-Xc1tabzhOw7f1pTE-Z6On5m3iqhdJoiAbc6FiMaTwjNQVCoqcf0_8A-Aq72uof4qcxiSoPqB28iOGuDf0grCwF1Ccg-fXHOgmvUFML_xKK22rWw2DHKyfbPvZh-gIK0JE9vTrCwscsjIUCONV9dGyXpXPDXev2o8YH9fexKIMG8cGe_vocbXoMnN_KN2dRKP6L_ORUHvKTE3GrHVTosrHqztwNTT-PqNVaTrts7PyQeCIlxr6zHIlGJhhqWSuVKznSkRofZuDSTuFdsGp-8AHFapyT1Xy8rlUVVmXVT8X1qvHqjmsmNoKQxLNOW-BhHQGkk7wJpZ8Wum9-sAuU-TCHKYG8s2Y43Y2cYeSFeqjYxq5yrjjOJMdopLqpuMG2K6jjMp5Nt1vPq3ULIOGt2iRWqc4KRvFdU7uBkBCRrIhwrdRSsvr6gJOvBDl8AB5vTJf9KdmWsnRa_2M3SAwm6X5CwxfK8OJZkbi8x1HTqXqW3uSJTzS7U4LtYNI0Z3QQTKy9pEWjddDMZYTtGnIrLiKc0EUFtxvo-pY-c7wQV9ODXx3pBE4l4l)
-
+![Container 
+Diagram](https://www.plantuml.com/plantuml/svg/dL9nJzi-4Fq_dyA_w2UjaL82jC2Onife8pQf54GPqpHDaPDS6skE7SKNYQZqk-y2DAQT2XFv9_QxzzuzstTga9TOvTBvJwX4LYcmZyD-CEpl50H-saIZeLO8T_X2bGi5vTPwNcW5Qfj-L2kUYsHR5GgfwzpAdNViAG-jkeyVhHRJsY3azo6Log8K1gBbcQvKoikwmwNWncUIno1zjXXWNS3IPmFaSuB_bqBzziZZ2agZrI8Axt2veHcaO9AI_eQy4VxMFhP_YvR4xHMsHwBlERxfY91awlLKPD7U_hgrnHUZ-7x8ampk7xB_Quk1RN4DagFGocIYi5tQXpaJIs9qPgNEVORQVqE7dyC-kv9SuRUByQzEXbYO3q5GD0ZDHDTWAaMyCnUOLV6Eq3GttHKzy1hzkJ38RY0d2O9rc1EyaYKw3-QyGfxoO2_cX-yFUE_uuEXerkE72J_UXVrUtD-VxUtszZWz6WgKmDpsXTX8y7d9SzPbeSAoBhHGw3gEqmwXcwouhlzCw7fiuTZdU4QBm1hvpEBTTHpk8A7OiGJNMpFQeAtjPfLA7jwCDCxJy5BhKgkKoayBprPiaysMbcCoaB8fVvO5vMJJPa-4fUFG06m_sFfkh7bAgLwKsA1ZJWV9LlIj5sEPJJnJg-Ha-cDw4rv4uUJsw_Nbv2ASt9oCmjjmV7dLh5y9OCzgRLyrd7wv_1wDm_DmCkfupYceb8Rt3m00)
 ### Healthcheck
 
 Containers run within a container enviroment which may provide a health status/probe to determine the 
@@ -39,8 +41,6 @@ To provide customized
 overwrite the symlinks. 
 - Should consider [Probe Common Pitfalls](https://loft.sh/blog/kubernetes-liveness-probes-examples-and-common-pitfalls/).
 - Downstream build scripts will need to include [--format=docker](https://github.com/gautada/alpine-container/issues/15) flag to parse the `HEALTHCHECK` tag.
-
-
 
 ### Profile 
 The default profile for Alpine is the `ash` shell.  This is configured as default using `ENV ENV="/etc/profile"` in the `Containerfile`. Usually to customize just add scripts `/etc/profile.d` folder
@@ -68,6 +68,9 @@ Each downstream image should co figure their own downstream default user in the 
 This the operating system container defines two version [aliases](https://linuxhandbook.com/linux-alias-command/) (`osversion` and `cversion`)
 - **Operating System(OS) Version** - `osversion` prints the release version of Alpine linux
 - **Container Version** - `cversion` prints the container's version, this is mainly for downstream containers where the primary application's version is represented. For instance if the contain is to provide `podman` this would return `podman --version`. This allows for a standard mechanism to determine the running version of the container. **This should be overloaded in downstream systems**. For better compatability the script `/bin/version` is provided infront of the `cversion` alias.  This script can be called in an `exec` mode and should be called in lieu of a direct call to `cversion`.
+
+### Scheduler
+
 
 ### Tools
 Look at the software installed in the container.

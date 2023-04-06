@@ -78,8 +78,9 @@ RUN /sbin/apk list > /etc/container/alpine.apk
 #  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
  
 COPY container-wheel /etc/container/container-wheel
-RUN /bin/ln -fsv /etc/container/container-wheel /etc/sudoers.d/container-wheel \
- && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
+RUN /bin/ln -fsv /etc/container/container-wheel /etc/sudoers.d/container-wheel
+# \
+#  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
 
 # ╭――――――――――――――――――╮
 # │STATUS             │
