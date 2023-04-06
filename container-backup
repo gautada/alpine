@@ -2,133 +2,55 @@
 #
 # container-backup: Controller script for container wide back-up
 
-# Load all the fetures in the backup drop-in directory
-# BACKUP_CONFIG="/etc/container/backup.d"
-#
-# BACKUP_LEGACY="/etc/container/backup.fnc"
+. /etc/profile
 
-# Dumb drop-in function... removing
-# if [ -d $BACKUP_CONFIG ] ; then
-#  for feature in $BACKUP_CONFIG/* ; do
-#   if [ -r "$feature" ] ; then
-#    echo "[ INFO]: Loading feature($feature)."
-#    source "$feature"
-#   fi
-#  done
-# else
-#  if [ -f $BACKUP_LEGACY ] ; then
-#   echo "[ INFO]: Loading legacy feature($BACKUP_LEGACY)."
-#   source $BACKUP_LEGACY
-#  else
-#   echo "[ERROR]: Unable to load the drop-in directory($BACKUP_CONFIG) or function file($BACKUP_LEGACY)"
-#   return 10
-#  fi
-# fi
+SOURCE="/tmp/backup"
+ARCHIVE="/var/backup"
+NAME="duplicity"
+CACHE="$ARCHIVE/$NAME"
+TARGET="/mnt/volumes/backup"
 
-BACKUP_FUNCTION="container_backup"
-# Load backup definition
-. /etc/container/backup
-if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
- echo "[ INFO]: Backup function($BACKUP_FUNCTION) loaded."
-else
- echo "[ERROR]: Unable to find the backup function($BACKUP_FUNCTION)"
- return 1
-fi
-
-# Load and/or confirm the key is loaded
-BACKUP_CERT="/etc/container/backup.crt"
-
-if [ ! -f $BACKUP_CERT ] ; then
- echo "[ERROR] Unable to find the backup certificate($BACKUP_CERT)"
- return 2
-else
- if  [ -L $TARGET ] ; then
-  if [ ! -e $TARGET ] ; then # Symlink is not correct
-   echo "[ERROR] Unable to find backup cert target"
-   return 3
-  fi
- fi
-fi
-
-KEY_FINGERPRINT="$(/usr/bin/gpg --show-keys $BACKUP_CERT | sed -n '2p' | xargs)"
-echo "[ INFO] Fingerprint: $KEY_FINGERPRINT"
-if [ "" == "$(/usr/bin/gpg --list-keys)" ] ; then
- echo "[ INFO] Importing key"
- /usr/bin/gpg --trusted-key $KEY_FINGERPRINT --import $BACKUP_CERT
-else
- echo "[ INFO] List keys"
- /usr/bin/gpg --list-keys
-fi
- # gpg --trusted-key $(gpg --show-keys /etc/backup/config/encryption.key | sed -n '2p' | xargs) --import /etc/backup/config/encryption.key
-
-
-
-# if [ -r $ENCRYPTION_KEY ] ; then
-#  echo "[ INFO]: Default encryption key($ENCRYPTION_KEY)"
-# else
-#  if [ -r $LEGACY_KEY ] ; then
-#   echo "[ WARN]: Overwrite Encryption Key with Legacy Key($LEGACY_KEY)"
-#   ENCRYPTION_KEY=$LEGACY_KEY
-#  else
-#   echo "[ERROR]: Could not find Encryption Key($ENCROPTION_KEY) or Legacy Key($LEGACY_KEY)"
-#   return 30
-#  fi
-# fi
-
-
-# Execute backup
-BACKUP_TAG="$(date --utc +%H)"
-# FOLDER_WORKING="/tmp/backup"
-FOLDER_WORK="/tmp/backup"
-FOLDER_CACHE="/var/backup"
-# FOLDER_BACKUP="/opt/backup"
-FOLDER_DEST="/mnt/volumes/backup"
-
-
-# Collect backup material
-/bin/mkdir -p $FOLDER_WORK
-if [ ! -d $FOLDER_WORK] ; then
- echo "[ INFO]: Execute the container backup function"
- cd $FOLDER_WORK
- container_backup # Call backup function
- RTN=$?
- if [ $RTN -ne 0 ] ; then
-  echo "[ERROR]: Function($RTN) did not work"
-  return $RTN
- fi
-fi
-cd /
-
-
-# Clear all but the latest chain
-echo "[ INFO]: Clean up backups"
-/usr/bin/duplicity remove-all-but-n-full 1 --force file://$FOLDER_DEST
-FILE_MANIFEST="$FOLDER_DEST/duplicity-full.*.manifest.gpg"
-
-# Backup $FOLDER_WORK -> $FOLDER_CACHE -> $FOLDER_DEST
-# Determine if full or incremental
-if [ ! -f $FILE_MANIFEST ] ; then
- echo "[ INFO]: FULL backup(No Manifest)"
- /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
-else
+run_backup() {
+ BACKUP_FUNCTION="container_backup"
+ if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
+  create_backup_source $SOURCE
+  echo "[ INFO]: Clean old backups"
+  MANIFEST="$(duplicity_clean $SOURCE $CACHE $TARGET)"
+  echo "Manifest: $MANIFEST"
+ 
+  # Determine if full or incremental
+  if [ ! -f $MANIFEST ] ; then
+   echo "[ INFO]: FULL backup(No Manifest)"
+   duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
+  else
    # RESET BACKUP CHAIN - At midnight
- if [ "00" == "$(date --utc +%H)" ] ; then
-  echo "[ INFO]: FULL backup(Daily 00)"
-  /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
- else
-  TIMESTAMP_LAST=$(date --utc +%s -r $FILE_MANIFEST)
-  TIMESTAMP_NOW=$(date --utc +%s)
-  TIMESTAMP_DAY=86400
-  TIMESTAMP_DELTA=$(($TIMESTAMP_NOW-$TIMESTAMP_LAST))
-  # RESET BACKUP CHAIN - If older than 24 hours
-  if [ $TIMESTAMP_DAY -lt $TIMESTAMP_DELTA ] ; then
-   echo "[ INFO]: FULL backup(Timestamp)"
-     /usr/bin/duplicity full --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
-  else # INCREMENTAL BACKUP
-   echo "[ INFO]: INCREMENTAL backup"
-   /usr/bin/duplicity incr --encrypt-key $KEY_FINGERPRINT --archive-dir $FOLDER_CACHE $FOLDER_WORK file://$FOLDER_DEST
+   if [ "00" == "$(date --utc +%H)" ] ; then
+    echo "[ INFO]: FULL backup(Daily 00)"
+    duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
+   else
+    TIMESTAMP_LAST=$(date --utc +%s -r $MANIFEST)
+    echo "Last: $TIMESTAMP_LAST"
+    TIMESTAMP_NOW=$(date --utc +%s)
+    echo "Now: $TIMESTAMP_NOW"
+    TIMESTAMP_DAY=86400
+    TIMESTAMP_DELTA=$(($TIMESTAMP_NOW-$TIMESTAMP_LAST))
+    echo "Delta: $TIMESTAMP_DELTA ($TIMESTAMP_DAY)"
+    # RESET BACKUP CHAIN - If older than 24 hours
+    if [ $TIMESTAMP_DAY -lt $TIMESTAMP_DELTA ] ; then
+     echo "[ INFO]: FULL backup(Timestamp)"
+     duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
+    else # INCREMENTAL BACKUP
+     echo "[ INFO]: INCREMENTAL backup"
+     duplicity_backup "incr" $NAME $SOURCE $CACHE $TARGET
+    fi
+   fi
   fi
+  clean_backup_source $SOURCE
+ else
+  echo "[WARN]: No backup function found"
  fi
-fi
-echo "[ INFO]: Clean working folder $FOLDER_WORK"
-rm -rvf $FOLDER_WORK/*
+ 
+}
+
+run_backup
+

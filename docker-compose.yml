@@ -1,15 +1,21 @@
 version: "3.9"
 services:
   alpine:
+    dns:
+      - 10.0.4.200
+      - 10.0.4.201
     build:
       args:
-        ALPINE_VERSION: "3.17.0"
+        ALPINE_VERSION: "3.17.2"
       context: .
       dockerfile: Containerfile
       no_cache: true
       tags:
         - "alpine:dev"
     image: "alpine:dev"
+    environment:
+      - SYSTEM_ENVIRONMENT=DEVELOPMENT
+    hostname: alpine
     ports:
       - "8080:8080"
     volumes:

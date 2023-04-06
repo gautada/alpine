@@ -1,8 +1,7 @@
 #!/bin/sh
 #
-# profile: This script is called from `/etc/profile.d/container-profile` and provides
-#          container specific overide for environment variables. Please make sure to
-#          overide the defaults below.
+# profile: This script is called from `/etc/profile.d/base-profile.sh`. This
+#          sets up the default functions and aliases for all containers.
 #
 # author: adam@gautier.org
 # date: 2022-11-16
@@ -10,16 +9,36 @@
 #
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-# Test that the base-profile is called first.
-type osversion > /dev/null
-RTN=$?
-if [ $RTN -eq 0 ] ; then
- # Default(Change) - Call the cmd for container version
- alias cversion='osversion'
- # Default(Remove) - allow for customization using the container-volume
- if [ -f /mnt/volumes/container/profile ] ; then
-  . /mnt/volumes/container/profile
- fi
-else
- echo "[WARN] Unable to fine osversion function"
-fi
+
+
+alias osversion='cat /etc/alpine-release'
+alias version='/usr/bin/container-version'
+
+# echo "_ALSV=$(osversion)" > /etc/container/.alsv
+
+log() {
+ DEBUG="[D]"
+ INFO="[I]"
+ WARN="[W]"
+ ERROR="[E]"
+
+ TIMESTAMP="$(/bin/date '+%h %d %H:%M:%S')"
+ LEVEL="$DEBUG"
+ OPTION=$1
+ case ${OPTION} in
+  -e) LEVEL="$ERROR"
+  ;;
+  -w) LEVEL="$WARN"
+  ;;
+  -i) LEVEL="$INFO"
+  ;;
+  -d) LEVEL="$DEBUG"
+  ;;
+ esac
+
+ COMPONENT="$2"
+ MSG="$3"
+ LOG_MSG="$TIMESTAMP container $COMPONENT:$LEVEL-$MSG"
+ echo $LOG_MSG
+}
+

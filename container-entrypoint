@@ -13,22 +13,18 @@ ENTRYPOINT_PARAMS="$@"
 
 log "-i" "entrypoint" "Start alpine($(osversion)-$(/usr/bin/whoami))"
 
-ENTRYPOINT_FUNCTION="/etc/container/entrypoint"
-
-# if [ ! -f $ENTRYPOINT_FUNCTION ] ; then
-#  echo "[ERROR] No entrypint function($ENTRYPOINT_FUNCTION)"
-#  return 1
-# fi
-
-log "-i" "entrypoint" "Clean duplicity"
-/bin/rm -rvf /mnt/volumes/backup/duplicity*
 
 log "-i" "entrypoint" "Start crond"
 /usr/bin/pgrep crond > /dev/null
-RTN=$?
-if [ $RTN -eq 1 ] ; then
- /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /dev/null
- RTN=$?
+TEST=$?
+if [ $TEST -eq 1 ] ; then
+ if [ "$SYSTEM_ENVIRONMENT" = "DEVELOPMENT" ] ; then
+   /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /var/log/crond
+   RTN=$?
+ else
+  /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /dev/stdout
+  RTN=$?
+ fi
  if [ $RTN -ne 0 ] ; then
   log "-i" "entrypoint" "Application (crond) failed to start"
   return 3
@@ -39,47 +35,17 @@ else
 fi
 /usr/bin/pgrep crond > /dev/null
 RTN=$?
- if [ $RTN -ne 0 ] ; then
-   log "-e" "entrypoint" "Application (crond) failed to start"
-  return 4
- fi
- 
-RTN=0
-if [ -f "/etc/container/entrypoint" ] ; then
- log "-i" "entrypoint" "Call container entrypoint"
- /etc/container/entrypoint $ENTRYPOINT_PARAMS
- RTN=$?
- if [ $RTN -ne 0 ] ; then
-   log "-i" "entrypoint" "Container entrypoint failed"
-  return 5
- fi
+if [ $RTN -ne 0 ] ; then
+ log "-e" "entrypoint" "Application (crond) failed to start"
+ return 4
 fi
 
-# else
-#  if [ -L "/etc/container.d/container-entrypoint" && -e "/etc/container.d/container-entrypoint" ] ; then
-#   echo "---------- [ Container(symlink) ] ----------"
-#   /etc/container/entrypoint $ENTRYPOINT_PARAMS
-#   RTN=$?
-#  fi
-# fi
-
-
-
-if [ ! -z "$ENTRYPOINT_PARAMS" ] ; then
- log "-i" "entrypoint" "Execute command"
- echo "- - - - - - - - - - - - - - - - - - - -"
+. /etc/container/entrypoint
+if [ "$SYSTEM_ENVIRONMENT" = "DEVELOPMENT" ] ; then
+ log "-e" "entrypoint" "Launch application as detatched"
+ app_entrypoint ENTRYPOINT_PARAMS >> /mnt/volumes/container/_log 2>&1 &
  exec $ENTRYPOINT_PARAMS
- RTN=$?
- echo "- - - - - - - - - - - - - - - - - - - -"
- return $RTN
 else
-  log "-i" "entrypoint" "No command - block with crond"
-  # Kill the background crond and restart with the forground service.  Crond is the default
-  # container process.
-  /usr/bin/pgrep /usr/sbin/crond > /dev/null
-  RTN=$?
-  if [ $? -eq 0 ] ; then
-   /usr/bin/sudo /usr/bin/killall crond
-  fi
-  /usr/bin/sudo /usr/sbin/crond -f -l 0
+ log "-e" "entrypoint" "Launch blocking application"
+ app_entrypoint ENTRYPOINT_PARAMS
 fi
