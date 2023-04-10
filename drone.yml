@@ -37,8 +37,9 @@ steps:
     DRONE_TOKEN:
       from_secret: server.drone.io
     commands:
-    - source /etc/profile
-    - /usr/bin/drone build create --branch main gatada/drone-container
+     - source /etc/profile
+     - /usr/bin/drone build create --branch main gatada/drone-container
+    
 trigger:
   branch:
   - main
