@@ -30,6 +30,15 @@ steps:
    - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:latest
    
 
+- name: downstream
+  environment:
+    DRONE_SERVER:
+      from_secret: token.drone.io
+    DRONE_TOKEN:
+      from_secret: server.drone.io
+    commands:
+    - source /etc/profile
+    - /usr/bin/drone build create --branch main gatada/drone-container
 trigger:
   branch:
   - main
