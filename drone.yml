@@ -1,6 +1,6 @@
 kind: pipeline
 type: exec
-name: Container Build - Alpine
+name: CI - Container Build - Alpine
 
 platform:
   os: linux
@@ -38,7 +38,7 @@ steps:
       from_secret: token.drone.io
   commands:
   # - source /etc/profile
-  - /usr/bin/drone build create --branch main gatada/drone-container
+  - /usr/bin/drone build create --branch main gautada/drone-container
     
 trigger:
   branch:
