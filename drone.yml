@@ -32,6 +32,9 @@ steps:
 
 - name: deploy
   failure: ignore
+  trigger:
+    branch:
+    - master
   environment:
     DRONE_SERVER:
       from_secret: server.drone.io
