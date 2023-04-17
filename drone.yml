@@ -96,5 +96,5 @@ trigger:
 #   branch:
 #   - main
   event:
-  - push
+  # - push
   - pull_request
