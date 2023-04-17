@@ -32,9 +32,6 @@ steps:
 
 - name: deploy
   failure: ignore
-  trigger:
-    branch:
-    - master
   environment:
     DRONE_SERVER:
       from_secret: server.drone.io
@@ -45,6 +42,9 @@ steps:
   - /usr/bin/drone build create --branch main gautada/drone-container
   - /usr/bin/drone build create --branch main gautada/gitea-container
   - /usr/bin/drone build create --branch main gautada/postgresql-container
+  when:
+    branch:
+    - master
     
 trigger:
   branch:
