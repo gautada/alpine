@@ -15,7 +15,7 @@ steps:
   - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:drone .
   when:
     branch:
-    - master   
+    - main   
 
 - name: publish
   environment:
@@ -33,7 +33,7 @@ steps:
    - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:latest
   when:
     branch:
-    - master   
+    - main   
 
 - name: deploy
   failure: ignore
@@ -49,7 +49,7 @@ steps:
   - /usr/bin/drone build create --branch main gautada/postgresql-container
   when:
     branch:
-    - master
+    - main
     
 # trigger:
 #   branch:
