@@ -1,6 +1,6 @@
 kind: pipeline
 type: exec
-name: CI - Container Build - Alpine
+name: CICD - Alpine Container
 
 platform:
   os: linux
@@ -49,4 +49,5 @@ steps:
 trigger:
   branch:
   - main
-  
+  event:
+  - push  
