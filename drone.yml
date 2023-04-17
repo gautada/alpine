@@ -55,5 +55,5 @@ trigger:
 #   branch:
 #   - main
   event:
-  # - push
-  - pull_request
+  - push
+  # - pull_request
