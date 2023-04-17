@@ -46,8 +46,8 @@ steps:
     branch:
     - master
     
-trigger:
-  branch:
-  - main
-  event:
-  - push  
+# trigger:
+#   branch:
+#   - main
+#   event:
+#   - push
