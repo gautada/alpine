@@ -12,8 +12,7 @@ steps:
   environment:
     ALPINE_VERSION: 3.17.0
   commands:
-  - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label 
-version="$(date +%Y.%m.%d)" --tag alpine:make .
+  - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --tag alpine:make .
   when:
     branch:
     - dev   
