@@ -1,18 +1,46 @@
 kind: pipeline
 type: exec
-name: CI - Container Build - Alpine
+name: CICD - Alpine Container
 
 platform:
   os: linux
   arch: arm64
 
 steps:
+
+- name: make
+  environment:
+    ALPINE_VERSION: 3.17.0
+  commands:
+  - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --tag alpine:make .
+  when:
+    branch:
+    - dev   
+
+- name: integrate
+  environment:
+    CONTAINER_NAME: "alpine"
+    CONTAINER_VERSION: 3.17.0
+    DOCKERIO_USERNAME:
+      from_secret: username.docker.io
+    DOCKERIO_PASSWORD:
+      from_secret: password.docker.io
+  commands:
+   - podman tag $CONTAINER_NAME:make docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:test
+   - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+   - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:test
+  when:
+    branch:
+    - dev   
+
 - name: build
   environment:
     ALPINE_VERSION: 3.17.0
   commands:
   - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:drone .
-
+  when:
+    branch:
+    - master   
 
 - name: publish
   environment:
@@ -28,7 +56,9 @@ steps:
    - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
    - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:$CONTAINER_VERSION
    - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:latest
-   
+  when:
+    branch:
+    - master   
 
 - name: deploy
   failure: ignore
@@ -42,8 +72,12 @@ steps:
   - /usr/bin/drone build create --branch main gautada/drone-container
   - /usr/bin/drone build create --branch main gautada/gitea-container
   - /usr/bin/drone build create --branch main gautada/postgresql-container
+  when:
+    branch:
+    - master
     
 trigger:
-  branch:
-  - main
-  
+#   branch:
+#   - main
+  event:
+  - push
