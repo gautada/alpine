@@ -13,6 +13,18 @@ steps:
   commands:
   - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:drone .
 
+- name: integrate
+  environment:
+    CONTAINER_NAME: "alpine"
+    CONTAINER_VERSION: 3.17.0
+    DOCKERIO_USERNAME:
+      from_secret: username.docker.io
+    DOCKERIO_PASSWORD:
+      from_secret: password.docker.io
+  commands:
+   - podman tag $CONTAINER_NAME:drone docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:test
+   - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+   - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:test
 
 - name: publish
   environment:
@@ -28,7 +40,9 @@ steps:
    - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
    - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:$CONTAINER_VERSION
    - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:latest
-   
+  when:
+    branch:
+    - master   
 
 - name: deploy
   failure: ignore
@@ -46,8 +60,8 @@ steps:
     branch:
     - master
     
-# trigger:
+trigger:
 #   branch:
 #   - main
-#   event:
-#   - push
+  event:
+  - push
