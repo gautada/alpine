@@ -17,6 +17,22 @@ steps:
     branch:
     - dev   
 
+- name: test
+  environment:
+    CONTAINER_NAME: "alpine"
+    CONTAINER_VERSION: 3.17.0
+    DOCKERIO_USERNAME:
+      from_secret: username.docker.io
+    DOCKERIO_PASSWORD:
+      from_secret: password.docker.io
+  commands:
+   - podman run $CONTAINER_NAME:make
+   - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+   - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:test
+  when:
+    branch:
+    - dev   
+
 - name: integrate
   environment:
     CONTAINER_NAME: "alpine"
@@ -81,3 +97,4 @@ trigger:
 #   - main
   event:
   - push
+  - pull_request
