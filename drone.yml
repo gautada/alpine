@@ -51,9 +51,9 @@ steps:
     branch:
     - master
     
-trigger:
+# trigger:
 #   branch:
 #   - main
-  event:
-  - push
-  # - pull_request
+#  event:
+#  - push
+#  # - pull_request
