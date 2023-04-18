@@ -9,31 +9,29 @@ platform:
 steps:
 
 - name: build
-  environment:
-    ALPINE_VERSION: 3.17.0
   commands:
-  - podman build --build-arg ALPINE_VERSION=$ALPINE_VERSION --file Containerfile --format docker --label revision="$(git rev-parse HEAD)" --label version="$(date +%Y.%m.%d)" --no-cache --tag alpine:drone .
-  when:
-    branch:
-    - main   
+  - /usr/bin/podman-compose build --no-cache
+  
+- name: test
+  commands:
+  - echo "No tests are defined at this time."
+  
 
-- name: publish
+- name: integrate
   environment:
-    CONTAINER_NAME: "alpine"
     CONTAINER_VERSION: 3.17.0
     DOCKERIO_USERNAME:
       from_secret: username.docker.io
     DOCKERIO_PASSWORD:
       from_secret: password.docker.io
   commands:
-   - podman tag $CONTAINER_NAME:drone docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:$CONTAINER_VERSION
-   - podman tag $CONTAINER_NAME:drone docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:latest
-   - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
-   - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:$CONTAINER_VERSION
-   - podman push docker.io/$DOCKERIO_USERNAME/$CONTAINER_NAME:latest
+  - podman login --username=$DOCKERIO_USERNAME --password=$DOCKERIO_PASSWORD docker.io
+  - podman tag $(/usr/bin/compose-service):build docker.io/$DOCKERIO_USERNAME/$(/usr/bin/compose-service):latest
+   - podman push docker.io/$DOCKERIO_USERNAME/$(/usr/bin/compose-service):latest
   when:
     branch:
-    - main   
+    - main
+
 
 - name: deploy
   failure: ignore
@@ -43,7 +41,6 @@ steps:
     DRONE_TOKEN:
       from_secret: token.drone.io
   commands:
-  # - source /etc/profile
   - /usr/bin/drone build create --branch main gautada/drone-container
   - /usr/bin/drone build create --branch main gautada/gitea-container
   - /usr/bin/drone build create --branch main gautada/postgresql-container
@@ -51,9 +48,7 @@ steps:
     branch:
     - main
     
-# trigger:
-#   branch:
-#   - main
-#  event:
-#  - push
-#  # - pull_request
+trigger:
+  event:
+  - push
+

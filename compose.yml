@@ -1,9 +1,6 @@
 version: "3.9"
 services:
   alpine:
-    dns:
-      - 10.0.4.200
-      - 10.0.4.201
     build:
       args:
         ALPINE_VERSION: "3.17.2"
@@ -11,8 +8,8 @@ services:
       dockerfile: Containerfile
       no_cache: true
       tags:
-        - "alpine:dev"
-    image: "alpine:dev"
+        - "alpine:build"
+    image: "gauta/build:dev"
     environment:
       - SYSTEM_ENVIRONMENT=DEVELOPMENT
     hostname: alpine
@@ -28,11 +25,11 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /Users/mada/Workspace/alpine/container-volume
+      device: /mnt/volumes/container
   backup:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /Users/mada/Workspace/alpine/backup-volume
+      device: /mnt/volumes/backup
       
