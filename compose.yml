@@ -9,8 +9,8 @@ services:
       dockerfile: Containerfile
       no_cache: true
       tags:
-        - "alpine:build"
-    image: "gautada/build:dev"
+        - "alpine:dev"
+    image: "gautada/alpine:dev"
     environment:
       - SYSTEM_ENVIRONMENT=DEVELOPMENT
     hostname: alpine
