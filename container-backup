@@ -11,6 +11,7 @@ CACHE="$ARCHIVE/$NAME"
 TARGET="/mnt/volumes/backup"
 
 run_backup() {
+ source /etc/container/backup-functions
  BACKUP_FUNCTION="container_backup"
  if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
   create_backup_source $SOURCE

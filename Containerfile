@@ -29,7 +29,7 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container \
 RUN /sbin/apk add --no-cache duplicity
 COPY container-backup /usr/bin/container-backup
 COPY backup /etc/container/backup
-COPY backup-functions.sh /etc/profile.d/backup-functions.sh
+COPY backup-functions /etc/container/backup-functions
 RUN /bin/mkdir -p /var/backup /tmp/backup \
  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
  && ln -fsv /mnt/volumes/secrets/namespace/signer.key /etc/container/signer.key \
