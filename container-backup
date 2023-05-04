@@ -5,6 +5,7 @@
 export SIGN_PASSPHRASE="$(cat /mnt/volumes/secrets/namespace/signer.pwd)"
 source /etc/container/backup-functions
 
+
 SOURCE="/tmp/backup"
 ARCHIVE="/var/backup"
 NAME="duplicity"
