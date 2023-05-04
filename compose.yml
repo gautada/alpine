@@ -3,8 +3,8 @@ services:
   alpine:
     build:
       args:
-        CONTAINER_VERSION: "3.16.5"
-        ALPINE_VERSION: "3.16.5"
+        CONTAINER_VERSION: "3.17.3"
+        ALPINE_VERSION: "3.17.3"
       context: .
       dockerfile: Containerfile
       no_cache: true
