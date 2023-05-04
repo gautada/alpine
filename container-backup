@@ -2,9 +2,8 @@
 #
 # container-backup: Controller script for container wide back-up
 
- source /etc/container/backup-functions
- # source /mnt/volumes/container/workspace/alpine/backup-function
-# . /etc/profile
+export SIGN_PASSPHRASE="$(cat /mnt/volumes/secrets/namespace/signer.pwd)"
+source /etc/container/backup-functions
 
 SOURCE="/tmp/backup"
 ARCHIVE="/var/backup"
