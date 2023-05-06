@@ -1,5 +1,7 @@
 #!/bin/ash
 
+source /etc/container/backup
+
 gpg_passphrase() {
  FINGERPRINT="$1"
  PASSPHRASE="$(/usr/bin/env | /bin/grep _$FINGERPRINT | /usr/bin/awk -F '=' '{print $2}')"
@@ -44,9 +46,9 @@ generate_hashmap() {
 #  return $?
 # }
  
-if [ -f "/etc/container/backup" ] ; then
- . /etc/container/backup
-fi
+# if [ -f "/etc/container/backup" ] ; then
+#  . /etc/container/backup
+# fi
 
 create_backup_source() {
  SOURCE="$1"
@@ -83,19 +85,28 @@ create_backup_source() {
 clean_backup_source() {
  SOURCE="$1"
  echo "[ INFO]: Clean source folder $SOURCE"
- /bin/rm -frv $SOURCE/*
+ /bin/rm -fr $SOURCE/*
 }
  
+parse_manifest_path() {
+ SOURCE="$1"
+ CACHE="$2"
+ TARGET="$3"
+ # echo "$TARGET/$(ls $TARGET/duplicity-full*.manifest.gpg | awk -F '/' '{print $5}' | sed 's/.\{4\}$//')"
+echo "$TARGET/$(ls $TARGET/duplicity-full*.manifest.gpg | awk -F '/' '{print $5}')"
+}
+
 duplicity_clean() {
  SOURCE="$1"
  CACHE="$2"
  TARGET="$3"
+ echo "[ INFO]: Cleaning duplicity"
  INFO="$(/usr/bin/duplicity remove-all-but-n-full 1 --force file:/$TARGET)"
  if [ -f "$TARGET/duplicity-full*.manifest.gpg" ] ; then
   MANIFEST="$CACHE/$(ls $TARGET/duplicity-full*.manifest.gpg | awk -F '/' '{print $5}' | sed 's/.\{4\}$//')"
   echo "$MANIFEST"
  else
-  echo "$CACHE/duplicity-full*.manifest"
+  echo "b $CACHE/$(echo '$(ls -1 /var/backup/duplicity/*)' | grep 'duplicity-full.*.manifest')"
  fi
 }
 

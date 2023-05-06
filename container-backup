@@ -2,7 +2,9 @@
 #
 # container-backup: Controller script for container wide back-up
 
-. /etc/profile
+export SIGN_PASSPHRASE="$(cat /mnt/volumes/secrets/namespace/signer.pwd)"
+source /etc/container/backup-functions
+
 
 SOURCE="/tmp/backup"
 ARCHIVE="/var/backup"
@@ -11,12 +13,15 @@ CACHE="$ARCHIVE/$NAME"
 TARGET="/mnt/volumes/backup"
 
 run_backup() {
+ # Confirm that backup function is available
  BACKUP_FUNCTION="container_backup"
  if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
   create_backup_source $SOURCE
   echo "[ INFO]: Clean old backups"
-  MANIFEST="$(duplicity_clean $SOURCE $CACHE $TARGET)"
-  echo "Manifest: $MANIFEST"
+  MANIFEST="$(parse_manifest_path $SOURCE $CACHE $TARGET)"
+  echo "[ INFO]: Manifest - $MANIFEST"
+  duplicity_clean $SOURCE $CACHE $TARGET
+  
  
   # Determine if full or incremental
   if [ ! -f $MANIFEST ] ; then
