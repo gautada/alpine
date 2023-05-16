@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# This script is the control script to test container health. The default behavior is to 
+# call the `/etc/container/health` script which will load and run all specific scripts in 
+# `/etc/container/health.d/*.health`. This script also unifies health checks for startup,
+# readiness, and liveness.  The default setup has all of the scripts `/usr/bin/container-liveness`,
+# `/usr/bin/container-readiness`, and `/usr/bin/container-startup` point to this script
+# `/usr/bin/container-health`.  To overide a downstream container should provide a specific
+# respective file `/etc/container/[liveness, readiness, and/or startup]` that defines the 
+# desired behavior
+
+health_override() {
+ CALL=$1
+ FUNC=$2
+ SCRIPT="/usr/bin/container-$_FUNC"
+ CUSTOM="/etc/container/$_FUNC"
+ # echo $CALL
+ # echo $FUNC
+ # echo $SCRIPT
+ # echo $CUSTOM
+ if [ "$CALL" = "$SCRIPT" ]; then
+  echo "$CALL == $SCRIPT"
+  if [ -x "$CUSTOM" ]; then
+   . $CUSTOM
+   exit $?
+  fi
+ fi
+}
+
+health_override $0 "liveness"
+health_override $0 "readiness"
+health_override $0 "startup"
+health_override $0 "health"
+
+DEFAULT="/etc/container/health"
+if [ -x "$DEFAULT" ]; then
+ echo "[W] Running default container health check"
+ . $DEFAULT
+ _container_health_check
+ exit $?
+else
+ echo "[E] No health check scripts found"
+ exit 1
+fi

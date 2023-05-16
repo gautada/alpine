@@ -1,0 +1,10 @@
+#!/bin/ash
+
+__check_cron() {
+ /usr/bin/pgrep crond > /dev/null
+ echo "$?"
+}
+
+__health_check() {
+ _health_assert "0" "$(__check_cron)" "Active cron daemon"
+}

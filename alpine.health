@@ -1,0 +1,19 @@
+#!/bin/sh
+
+__alpine_stable_version() {
+ echo "0.0.0"
+}
+
+__alpine_running_version() {
+ . /etc/container/entrypoint
+ container_version
+}
+
+__health_check() {
+ _health_assert "$(__debian_stable_version)" "$(__debian_running_version)" "Debian stable version must equal running version"
+ _health_assert "$(_docker_latest_version 'library/debian')" "$(__debian_running_version)" "Debian docker latest image version must equal running version"
+ _health_assert "$(_docker_latest_version 'gautada/debian')" "$(__debian_running_version)" "Debian container latest image version must equal running version"
+}
+
+
+
