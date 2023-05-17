@@ -4,7 +4,7 @@ ARG ALPINE_VERSION=3.16.2
 # │ Contaierbuild.                                                               │
 # │                                                                              │
 # ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
-FROM alpine:$ALPINE_VERSION as build
+FROM alpine:$ALPINE_VERSION as container
 
 # ╭――――――――――――――――――――╮
 # │ METADATA           │
@@ -79,7 +79,6 @@ RUN /bin/ln -fsv /mnt/volumes/container/backup /etc/container/backup
 # ╰――――――――――――――――――――╯
 COPY container-entrypoint /usr/bin/container-entrypoint
 COPY entrypoint /etc/container/entrypoint
-ENTRYPOINT ["/usr/bin/container-entrypoint"]
 
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
@@ -149,9 +148,11 @@ RUN /bin/ln -fsv /home/$USER/.config/git/credentials /home/$USER/.git-credential
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/nvim /home/$USER/.config/nvim
 
 # ╭――――――――――――――――――――╮
-# │CONTAINER           │
+# │FINAL CONTAINER     │
 # ╰――――――――――――――――――――╯
-
+FROM scratch
+COPY --from=container / /
+ENTRYPOINT ["/usr/bin/container-entrypoint"]
 VOLUME /mnt/volumes/backup
 VOLUME /mnt/volumes/configmaps
 VOLUME /mnt/volumes/container
@@ -160,6 +161,3 @@ VOLUME /mnt/volumes/secrets/container
 EXPOSE 8080/tcp
 USER root
 WORKDIR /
-
-FROM scratch
-COPY --from=build / /
