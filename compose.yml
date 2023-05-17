@@ -14,10 +14,12 @@ services:
     image: "alpine:dev"
     hostname: alpine
     ports:
-      - "8080:8080"
+      - "8888:8080"
     volumes:
-      - "/Users/mada/Workspace/Container:/mnt/volumes/container"
-      - "/Users/mada/Workspace/Backup:/mnt/volumes/backup"
+      # - "/Users/mada/Workspace/Container:/mnt/volumes/container"
+      # - "/Users/mada/Workspace/Backup:/mnt/volumes/backup"
+      - "/mnt/volumes/container/Workspace/Container:/mnt/volumes/container"
+      - "/mnt/volumes/container//Workspace/Backup:/mnt/volumes/backup"
 #         
 # volumes:
 #   container:

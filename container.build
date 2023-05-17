@@ -4,7 +4,7 @@ ARG ALPINE_VERSION=3.16.2
 # │ Contaierbuild.                                                               │
 # │                                                                              │
 # ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
-FROM alpine:$ALPINE_VERSION
+FROM alpine:$ALPINE_VERSION as build
 
 # ╭――――――――――――――――――――╮
 # │ METADATA           │
@@ -33,7 +33,7 @@ RUN /sbin/apk add --no-cache zsh \
  && /sbin/apk add --no-cache git jq nano shadow sudo tzdata 
 
 # ╭―――――――――――――――――――╮
-# │ CONFIG            │
+# │ CONFIG (ROOT)     │
 # ╰―――――――――――――――――――╯
  
 # --- [ GENERAL - OS LEVEL CONFIG ] ---
@@ -108,20 +108,9 @@ COPY os.health /etc/container/health.d/os.health
 COPY cron.health /etc/container/health.d/cron.health
 
 # ╭――――――――――――――――――――╮
-# │CONTAINER           │
-# ╰――――――――――――――――――――╯
-
-VOLUME /mnt/volumes/backup
-VOLUME /mnt/volumes/configmaps
-VOLUME /mnt/volumes/container
-VOLUME /mnt/volumes/secrets/namespace
-VOLUME /mnt/volumes/secrets/container
-EXPOSE 8080/tcp
-
-# ╭――――――――――――――――――――╮
 # │USER                │
 # ╰――――――――――――――――――――╯
-ARG USER=alpine
+ARG USER=gautada
 ARG ID=1001  
 
 RUN /usr/sbin/groupadd --gid $ID $USER
@@ -149,7 +138,7 @@ RUN /bin/mkdir -p /home/$USER/.config/repo \
 # *** ZSH ***
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/zsh /home/$USER/.config/zsh
 RUN /bin/ln -fsv /home/$USER/.config/zsh/rc /home/$USER/.config/zshrc
-# RUN /bin/ln -fsv /mnt/volumes/container/users/coder/zsh/history /home/$USER/.config/.zsh_history
+RUN /bin/ln -fsv /mnt/volumes/container/users/coder/zsh/history /home/$USER/.config/.zsh_history
 
 # *** GIT ***
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/git /home/$USER/.config/git
@@ -159,80 +148,18 @@ RUN /bin/ln -fsv /home/$USER/.config/git/credentials /home/$USER/.git-credential
 # *** NEOVIM **
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/nvim /home/$USER/.config/nvim
 
+# ╭――――――――――――――――――――╮
+# │CONTAINER           │
+# ╰――――――――――――――――――――╯
 
+VOLUME /mnt/volumes/backup
+VOLUME /mnt/volumes/configmaps
+VOLUME /mnt/volumes/container
+VOLUME /mnt/volumes/secrets/namespace
+VOLUME /mnt/volumes/secrets/container
+EXPOSE 8080/tcp
+USER root
+WORKDIR /
 
-
-# ╭―――――――――――――――――――╮
-# │ BACKUP            │
-# ╰―――――――――――――――――――╯
-# RUN /sbin/apk add --no-cache duplicity
-# COPY container-backup /usr/bin/container-backup
-# COPY backup /etc/container/backup
-# COPY backup-functions /etc/container/backup-functions
-# RUN /bin/mkdir -p /var/backup /tmp/backup \
-#  && ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup \
-#  && ln -fsv /mnt/volumes/secrets/namespace/signer.key /etc/container/signer.key \
-#  && ln -fsv /mnt/volumes/configmaps/signer.key /mnt/volumes/secrets/namespace/signer.key \
-#  && ln -fsv /mnt/volumes/container/signer.key /mnt/volumes/configmaps/signer.key \
-#  && ln -fsv /mnt/volumes/secrets/namespace/encrypter.key /etc/container/encrypter.key \
-#  && ln -fsv /mnt/volumes/configmaps/encrypter.key /mnt/volumes/secrets/namespace/encrypter.key \
-#  && ln -fsv /mnt/volumes/container/encrypter.key /mnt/volumes/configmaps/encrypter.key \
-#  
-# ╭――――――――――――――――――――╮
-# │ DEVELOPMENT        │
-# ╰――――――――――――――――――――╯
-# Uncommend to test the .dockerignore build context [Reference](https://www.geeksforgeeks.org/how-to-use-a-dockerignore-file/)
-# COPY . /.context
-# 
-# ╭――――――――――――――――――――╮
-# │ ENTRYPOINT         │
-# ╰――――――――――――――――――――╯
-# RUN /bin/ln -fsv /mnt/volumes/container/entrypoint /etc/container/entrypoint
-# COPY container-entrypoint /usr/bin/container-entrypoint
-# ENTRYPOINT ["/usr/bin/container-entrypoint"]
-# 
-# ╭――――――――――――――――――――╮
-# │ ENVIRONMENT        │
-# ╰――――――――――――――――――――╯
-# ENV ENV="/etc/profile"
-# COPY profile /etc/container/profile
-# RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
-# 
-# ╭――――――――――――――――――――╮
-# │ PRIVILEGE          │
-# ╰――――――――――――――――――――╯
-# COPY _wheel /etc/container/.wheel
-# RUN /bin/ln -fsv /etc/container/.wheel /etc/sudoers.d/_wheel \
-#  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
-#  
-# COPY container-wheel /etc/container/container-wheel
-# RUN /bin/ln -fsv /etc/container/container-wheel /etc/sudoers.d/container-wheel
-# \
-#  && /bin/ln -fsv /etc/container/wheel /etc/sudoers.d/wheel
-# 
-# ╭――――――――――――――――――╮
-# │STATUS            │
-# ╰――――――――――――――――――╯
-# Conforms to the status component design.
-# COPY container-health-check /usr/bin/container-health-check
-# COPY container-status-check /usr/bin/container-status-check
-# COPY alpine-latest-stable-version /usr/bin/alpine-latest-stable-version
-# RUN /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-liveness-check \
-#  && /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-readiness-check \
-#  && /bin/ln -fsv /usr/bin/container-health-check /usr/bin/container-startup-check
-# COPY alpine-latest-stable-version /usr/bin/alpine-latest-stable-version
-# COPY alsv-updater /usr/bin/alsv-updater
-# RUN /bin/ln -fsv /usr/bin/alsv-updater /etc/periodic/monthly/alsv-updater
-# HEALTHCHECK --interval=10m --timeout=1m --start-period=5m --retries=10 CMD /usr/bin/container-health-check
-# touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600
-# 
-# ╭――――――――――――――――――――╮
-# │ TIMEZONES          │
-# ╰――――――――――――――――――――╯
-# RUN /bin/cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
-# RUN /bin/echo "America/New_York" > /etc/timezone
-# 
-# ╭――――――――――――――――――――╮
-# │VERSION             │
-# ╰――――――――――――――――――――╯
-# COPY version /usr/bin/container-version
+FROM scratch
+COPY --from=build / /
