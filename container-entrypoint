@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 #
 # [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint) is the default
 # initial process which and executes all the applications and services that run in a container.
@@ -8,44 +8,33 @@
 # file (which by default is a symlink to `/mnt/volumes/container/entrypoint`
 #
 
+/bin/echo
+/bin/echo "~~~~~~~~~~~~~~~~~~~~~~~~"
+/bin/echo
+
 ENTRYPOINT_PARAMS="$@"
-. /etc/profile
+. /etc/container/entrypoint
 
-log "-i" "entrypoint" "Start alpine($(osversion)-$(/usr/bin/whoami))"
+/bin/echo "[I] Container ($HOSTNAME $(container_version) as [$(/usr/bin/whoami)])"
 
-
-log "-i" "entrypoint" "Start crond"
+# /usr/sbin/crond -b -l 0 -L /var/log/crond
 /usr/bin/pgrep crond > /dev/null
 TEST=$?
 if [ $TEST -eq 1 ] ; then
- if [ "$SYSTEM_ENVIRONMENT" = "DEVELOPMENT" ] ; then
-   /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /var/log/crond
-   RTN=$?
- else
-  /usr/bin/sudo /usr/sbin/crond -b -l 0 -L /dev/stdout
-  RTN=$?
- fi
+ /bin/echo " [I] Launch cron daemon"
+ /usr/bin/sudo /usr/sbin/crond -b - l 0 -L /dev/null
+ RTN=$?
  if [ $RTN -ne 0 ] ; then
-  log "-i" "entrypoint" "Application (crond) failed to start"
-  return 3
+  /bin/echo "Application (cron) failed to start"
+  exit 1
  fi
+fi
+ 
+if [ -z $ENTRYPOINT_PARAMS ] ; then
+ /bin/echo " [I] Launch blocking application"
+ container_entrypoint "$ENTRYPOINT_PARAMS" 
 else
- log "-e" "entrypoint" "Application(crond) already started"
- return 2
-fi
-/usr/bin/pgrep crond > /dev/null
-RTN=$?
-if [ $RTN -ne 0 ] ; then
- log "-e" "entrypoint" "Application (crond) failed to start"
- return 4
-fi
-
-. /etc/container/entrypoint
-if [ "$SYSTEM_ENVIRONMENT" = "DEVELOPMENT" ] ; then
- log "-e" "entrypoint" "Launch application as detatched"
- app_entrypoint ENTRYPOINT_PARAMS >> /mnt/volumes/container/_log 2>&1 &
+ /bin/echo " [I] Launch application as detatched"
+ container_entrypoint "$ENTRYPOINT_PARAMS" >> /mnt/volumes/container/_log 2>&1 &
  exec $ENTRYPOINT_PARAMS
-else
- log "-e" "entrypoint" "Launch blocking application"
- app_entrypoint ENTRYPOINT_PARAMS
 fi

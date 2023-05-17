@@ -1,61 +1,51 @@
 #!/bin/sh
-#
-# container-backup: Controller script for container wide back-up
 
+<<<<<<< HEAD
 export SIGN_PASSPHRASE="$(cat /mnt/volumes/secrets/namespace/signer.pwd)"
 source /etc/container/backup-functions
 
+=======
+# New container backup.  Should securely create a tarball archive of all relevant container data in the /mnt/volumes/backup/<container> 
+# directory by calling the backup function
+>>>>>>> fb2b1a9 (Added files and updated for the new base container layout)
 
-SOURCE="/tmp/backup"
-ARCHIVE="/var/backup"
-NAME="duplicity"
-CACHE="$ARCHIVE/$NAME"
-TARGET="/mnt/volumes/backup"
+echo "-------------------"
 
-run_backup() {
- # Confirm that backup function is available
- BACKUP_FUNCTION="container_backup"
- if [ "$(type -t $BACKUP_FUNCTION)" == "$BACKUP_FUNCTION" ] ; then
-  create_backup_source $SOURCE
-  echo "[ INFO]: Clean old backups"
-  MANIFEST="$(parse_manifest_path $SOURCE $CACHE $TARGET)"
-  echo "[ INFO]: Manifest - $MANIFEST"
-  duplicity_clean $SOURCE $CACHE $TARGET
-  
- 
-  # Determine if full or incremental
-  if [ ! -f $MANIFEST ] ; then
-   echo "[ INFO]: FULL backup(No Manifest)"
-   duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
-  else
-   # RESET BACKUP CHAIN - At midnight
-   if [ "00" == "$(date --utc +%H)" ] ; then
-    echo "[ INFO]: FULL backup(Daily 00)"
-    duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
-   else
-    TIMESTAMP_LAST=$(date --utc +%s -r $MANIFEST)
-    echo "Last: $TIMESTAMP_LAST"
-    TIMESTAMP_NOW=$(date --utc +%s)
-    echo "Now: $TIMESTAMP_NOW"
-    TIMESTAMP_DAY=86400
-    TIMESTAMP_DELTA=$(($TIMESTAMP_NOW-$TIMESTAMP_LAST))
-    echo "Delta: $TIMESTAMP_DELTA ($TIMESTAMP_DAY)"
-    # RESET BACKUP CHAIN - If older than 24 hours
-    if [ $TIMESTAMP_DAY -lt $TIMESTAMP_DELTA ] ; then
-     echo "[ INFO]: FULL backup(Timestamp)"
-     duplicity_backup "full" $NAME $SOURCE $CACHE $TARGET
-    else # INCREMENTAL BACKUP
-     echo "[ INFO]: INCREMENTAL backup"
-     duplicity_backup "incr" $NAME $SOURCE $CACHE $TARGET
-    fi
-   fi
-  fi
-  clean_backup_source $SOURCE
- else
-  echo "[WARN]: No backup function found"
- fi
- 
-}
+BKUP="/tmp/backup"
+/bin/mkdir -p $BKUP
+cd $TEMP
 
-run_backup
+TEMP="$(/bin/mktemp --directory $BKUP/XXXXX)"
+# echo $TEMP
+/bin/mkdir -p $TEMP
+
+/bin/chown $(/usr/bin/id -un 1001):$(/usr/bin/id -un 1001) $TEMP
+cd $TEMP
+
+/bin/su $(/usr/bin/id -un 1001) -c ". /etc/container/backup ; app_backup"
+
+# pwd
+# echo "$BKUP/$HOSTNAME.tar"
+# echo "-------------------"
+# export
+# echo
+# echo
+
+ARCHIVE="$BKUP/$(echo $HOSTNAME).tgz"
+/bin/tar  --create --gzip --file=$ARCHIVE --verbose ./*
+
+if [ -f /mnt/volumes/backup/.backup ] ; then
+ echo "Backup lock is active"
+fi
+
+if [ -f /mnt/volumes/backup/.archive ] ; then
+ echo "Archive lock is active"
+fi
+
+/bin/touch /mnt/volumes/backup/.backup
+/bin/cp -v $ARCHIVE /mnt/volumes/backup/
+/bin/rm -f /mnt/volumes/backup/.backup
+/bin/rm -rf $BKUP
+echo "~~~~~~~~~~~~~~~~~~~"
+
 

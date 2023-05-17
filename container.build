@@ -1,0 +1,165 @@
+ARG ALPINE_VERSION=3.16.2
+# ╭――――――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
+# │                                                                              │
+# │ Contaierbuild.                                                               │
+# │                                                                              │
+# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
+FROM alpine:$ALPINE_VERSION as build
+
+# ╭――――――――――――――――――――╮
+# │ METADATA           │
+# ╰――――――――――――――――――――╯
+LABEL source="https://github.com/gautada/alpine-container.git"
+LABEL maintainer="Adam Gautier <adam@gautier.org>"
+LABEL description="Alpine Linux base container."
+
+# ╭――――――――――――――――――――╮
+# │ VOLUMES            │
+# ╰――――――――――――――――――――╯
+RUN /bin/mkdir -p /mnt/volumes/configmaps \
+                  /mnt/volumes/container \ 
+                  /mnt/volumes/backup \    
+                  /mnt/volumes/secrets/namespace \
+                  /mnt/volumes/secrets/container  
+                  
+# ╭――――――――――――――――――――╮
+# │ PACKAGES           │
+# ╰――――――――――――――――――――╯
+# *** SHELL ***
+RUN /sbin/apk add --no-cache zsh \
+# *** NETWORKING ***
+ && /sbin/apk add --no-cache bind-tools curl iputils nmap nmap-ncat \
+# *** UTILS ***
+ && /sbin/apk add --no-cache git jq nano shadow sudo tzdata 
+
+# ╭―――――――――――――――――――╮
+# │ CONFIG (ROOT)     │
+# ╰―――――――――――――――――――╯
+ 
+# --- [ GENERAL - OS LEVEL CONFIG ] ---
+RUN /bin/mkdir -p /etc/container \
+
+# *** TIMEZONE ***
+ && echo "America/New_York" > /etc/timezone \
+ && /bin/ln -fsv /usr/share/zoneinfo/$(cat /etc/timezone) /etc/localtime
+ 
+# --- [ SPECIFIC - APPLICATION CONFIG ] ---
+# ** GIT -- CONFIG **
+# [Git config locations](https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-config.html#FILES)
+RUN /bin/ln -fsv /etc/container/git-config /etc/gitconfig \
+ && /bin/ln -fsv /mnt/volumes/configmaps/git-config /etc/container/git-config \
+ && /bin/ln -fsv /mnt/volumes/container/git-config /mnt/volumes/configmaps/git-config
+
+# ** KUBECTL **
+RUN /bin/ln -fsv /mnt/volumes/configmaps/kubectl.cfg /etc/container/kubectl.cfg \
+ && /bin/ln -fsv /mnt/volumes/container/kubectl.cfg /mnt/volumes/configmaps/kubectl.cfg
+
+# --- [ SECRET/PRIVATE CONFIG ] ---
+
+# ** GIT -- CREDENTIALS **
+RUN /bin/ln -fsv /mnt/volumes/secrets/container/git-credentials \
+                 /etc/container/git-credentials \
+ && /bin/ln -fsv /mnt/volumes/container/git-credentials \
+                 /mnt/volumes/secrets/container/git-credentials
+
+# ** CERT-AUTH ** 
+RUN /bin/ln -fsv /mnt/volumes/secrets/container/ca.crt /etc/container/ca.crt \
+ && /bin/ln -fsv /mnt/volumes/container/ca.crt /mnt/volumes/secrets/container/ca.crt \
+ && /bin/ln -fsv /mnt/volumes/secrets/container/ca.key /etc/container/ca.key \
+ && /bin/ln -fsv /mnt/volumes/container/ca.key /mnt/volumes/secrets/container/ca.key
+
+# ╭―――――――――――――――――――╮
+# │ BACKUP            │
+# ╰―――――――――――――――――――╯
+COPY container-backup /usr/bin/container-backup
+RUN /bin/ln -fsv /mnt/volumes/container/backup /etc/container/backup
+
+# ╭――――――――――――――――――――╮
+# │ ENTRYPOINT         │
+# ╰――――――――――――――――――――╯
+COPY container-entrypoint /usr/bin/container-entrypoint
+COPY entrypoint /etc/container/entrypoint
+ENTRYPOINT ["/usr/bin/container-entrypoint"]
+
+# ╭――――――――――――――――――――╮
+# │ PRIVILEGE          │
+# ╰――――――――――――――――――――╯
+COPY privileges /etc/container/privileges
+RUN /bin/ln -fsv /etc/container/privileges /etc/sudoers.d/privileges \
+ && /usr/sbin/groupadd --gid 99 privileged
+ 
+# ╭――――――――――――――――――――╮
+# │ ENVIRONMENT        │
+# ╰――――――――――――――――――――╯
+# ENV ENV="/etc/profile"
+# COPY profile /etc/container/profile
+# RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
+
+# ╭――――――――――――――――――╮
+# │HEALTH            │
+# ╰――――――――――――――――――╯  
+COPY container-health /usr/bin/container-health
+COPY health /etc/container/health
+RUN /bin/mkdir -p /etc/container/health.d \
+ && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-liveness \
+ && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-readiness \
+ && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-startup
+COPY os.health /etc/container/health.d/os.health
+COPY cron.health /etc/container/health.d/cron.health
+
+# ╭――――――――――――――――――――╮
+# │USER                │
+# ╰――――――――――――――――――――╯
+ARG USER=gautada
+ARG ID=1001  
+
+RUN /usr/sbin/groupadd --gid $ID $USER
+RUN /usr/sbin/useradd --create-home --gid $ID --shell /bin/zsh --uid $ID $USER
+RUN /usr/sbin/adduser $USER privileged
+RUN /bin/echo "$USER:$USER" | chpasswd
+RUN /bin/echo "# Default zshrc" > /home/$USER/.zshrc
+RUN /bin/chown -R $USER:$USER /mnt/volumes/container
+RUN /bin/chown -R $USER:$USER /mnt/volumes/backup
+
+# -- NOTE: Copy this segment for downstream containers --
+# For downstream change copy the following lines and change the user arg
+# ARG USER=<USER>
+# RUN /usr/sbin/usermod --login $USER --home /home/$USER --move-home debian
+# RUN /usr/sbin/groupmod --new-name $USER debian
+USER $USER
+WORKDIR /home/$USER
+
+# Pull in public config repo, this is just a series of text file so it does not matter if
+# this is pulled for all downstream containers as it is relatively small
+
+RUN /bin/mkdir -p /home/$USER/.config/repo \
+ && git clone https://github.com/gautada/config.git /home/$USER/.config/repo/public
+
+# *** ZSH ***
+RUN /bin/ln -fsv /home/$USER/.config/repo/public/zsh /home/$USER/.config/zsh
+RUN /bin/ln -fsv /home/$USER/.config/zsh/rc /home/$USER/.config/zshrc
+RUN /bin/ln -fsv /mnt/volumes/container/users/coder/zsh/history /home/$USER/.config/.zsh_history
+
+# *** GIT ***
+RUN /bin/ln -fsv /home/$USER/.config/repo/public/git /home/$USER/.config/git
+RUN /bin/ln -fsv /home/$USER/.config/git/config /home/$USER/.gitconfig
+RUN /bin/ln -fsv /home/$USER/.config/git/credentials /home/$USER/.git-credentials
+
+# *** NEOVIM **
+RUN /bin/ln -fsv /home/$USER/.config/repo/public/nvim /home/$USER/.config/nvim
+
+# ╭――――――――――――――――――――╮
+# │CONTAINER           │
+# ╰――――――――――――――――――――╯
+
+VOLUME /mnt/volumes/backup
+VOLUME /mnt/volumes/configmaps
+VOLUME /mnt/volumes/container
+VOLUME /mnt/volumes/secrets/namespace
+VOLUME /mnt/volumes/secrets/container
+EXPOSE 8080/tcp
+USER root
+WORKDIR /
+
+FROM scratch
+COPY --from=build / /
