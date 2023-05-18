@@ -37,9 +37,9 @@ _docker_latest_version() {
    *.*.*)
     echo "$result"
     ;;
-   *.*)
-    echo "$result"
-    ;;
+#    *.*)
+#     echo "$result"
+#     ;;
    *)
     # echo "** [$result]"
     # result="The variable '$result' is in the #.# or #.#.# format."
