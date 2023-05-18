@@ -116,7 +116,7 @@ COPY cron.health /etc/container/health.d/cron.health
 # ╭――――――――――――――――――――╮
 # │USER                │
 # ╰――――――――――――――――――――╯
-ARG USER=busr
+ARG USER=alpine
 ARG ID=1001  
 
 RUN /usr/sbin/groupadd --gid $ID $USER
