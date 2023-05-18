@@ -101,6 +101,11 @@ RUN /bin/ln -fsv /etc/container/privileges /etc/sudoers.d/privileges \
 # COPY profile /etc/container/profile
 # RUN /bin/ln -fsv /etc/container/profile /etc/profile.d/container-profile.sh
 
+# ╭――――――――――――――――――――╮
+# │ VERSION            │
+# ╰――――――――――――――――――――╯
+COPY container-version /usr/bin/container-version
+
 # ╭――――――――――――――――――╮
 # │HEALTH            │
 # ╰――――――――――――――――――╯  
