@@ -1,9 +1,9 @@
 ARG ALPINE_VERSION=3.16.2
-# ╭――――――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
-# │                                                                              │
-# │ Contaierbuild.                                                               │
-# │                                                                              │
-# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
+# ╭―――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
+# │                                                                           │
+# │ CONTAINER BUILD                                                           │
+# │                                                                           │
+# ╰―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
 FROM alpine:$ALPINE_VERSION as container
 
 # ╭――――――――――――――――――――╮
@@ -35,7 +35,6 @@ RUN /sbin/apk add --no-cache zsh \
 # ╭―――――――――――――――――――╮
 # │ CONFIG (ROOT)     │
 # ╰―――――――――――――――――――╯
- 
 # --- [ GENERAL - OS LEVEL CONFIG ] ---
 RUN /bin/mkdir -p /etc/container \
 
@@ -47,12 +46,16 @@ RUN /bin/mkdir -p /etc/container \
 # ** GIT -- CONFIG **
 # [Git config locations](https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-config.html#FILES)
 RUN /bin/ln -fsv /etc/container/git-config /etc/gitconfig \
- && /bin/ln -fsv /mnt/volumes/configmaps/git-config /etc/container/git-config \
- && /bin/ln -fsv /mnt/volumes/container/git-config /mnt/volumes/configmaps/git-config
+ && /bin/ln -fsv /mnt/volumes/configmaps/git-config \
+                 /etc/container/git-config \
+ && /bin/ln -fsv /mnt/volumes/container/git-config \
+                 /mnt/volumes/configmaps/git-config
 
 # ** KUBECTL **
-RUN /bin/ln -fsv /mnt/volumes/configmaps/kubectl.cfg /etc/container/kubectl.cfg \
- && /bin/ln -fsv /mnt/volumes/container/kubectl.cfg /mnt/volumes/configmaps/kubectl.cfg
+RUN /bin/ln -fsv /mnt/volumes/configmaps/kubectl.cfg \
+                 /etc/container/kubectl.cfg \
+ && /bin/ln -fsv /mnt/volumes/container/kubectl.cfg \
+                 /mnt/volumes/configmaps/kubectl.cfg
 
 # --- [ SECRET/PRIVATE CONFIG ] ---
 
@@ -63,10 +66,14 @@ RUN /bin/ln -fsv /mnt/volumes/secrets/container/git-credentials \
                  /mnt/volumes/secrets/container/git-credentials
 
 # ** CERT-AUTH ** 
-RUN /bin/ln -fsv /mnt/volumes/secrets/container/ca.crt /etc/container/ca.crt \
- && /bin/ln -fsv /mnt/volumes/container/ca.crt /mnt/volumes/secrets/container/ca.crt \
- && /bin/ln -fsv /mnt/volumes/secrets/container/ca.key /etc/container/ca.key \
- && /bin/ln -fsv /mnt/volumes/container/ca.key /mnt/volumes/secrets/container/ca.key
+RUN /bin/ln -fsv /mnt/volumes/secrets/container/ca.crt \
+                 /etc/container/ca.crt \
+ && /bin/ln -fsv /mnt/volumes/container/ca.crt \
+                 /mnt/volumes/secrets/container/ca.crt \
+ && /bin/ln -fsv /mnt/volumes/secrets/container/ca.key \
+                 /etc/container/ca.key \
+ && /bin/ln -fsv /mnt/volumes/container/ca.key \
+                 /mnt/volumes/secrets/container/ca.key
 
 # ╭―――――――――――――――――――╮
 # │ BACKUP            │
@@ -128,16 +135,17 @@ RUN /bin/chown -R $USER:$USER /mnt/volumes/backup
 USER $USER
 WORKDIR /home/$USER
 
-# Pull in public config repo, this is just a series of text file so it does not matter if
-# this is pulled for all downstream containers as it is relatively small
+# Pull in public config repo, this is just a series of text file so it does 
+# not matter if this is pulled for all downstream containers as it is 
+# relatively small
 
 RUN /bin/mkdir -p /home/$USER/.config/repo \
- && git clone https://github.com/gautada/config.git /home/$USER/.config/repo/public
+ && git clone https://github.com/gautada/config.git \
+              /home/$USER/.config/repo/public
 
 # *** ZSH ***
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/zsh /home/$USER/.config/zsh
 RUN /bin/ln -fsv /home/$USER/.config/zsh/rc /home/$USER/.config/zshrc
-RUN /bin/ln -fsv /mnt/volumes/container/users/coder/zsh/history /home/$USER/.config/.zsh_history
 
 # *** GIT ***
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/git /home/$USER/.config/git

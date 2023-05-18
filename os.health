@@ -5,8 +5,7 @@ __os_stable_version() {
 }
 
 __os_running_version() {
- . /etc/container/entrypoint
- container_version
+ /bin/cat /etc/alpine-release
 }
 
 __health_check() {
@@ -14,6 +13,4 @@ __health_check() {
  _health_assert "$(_docker_latest_version 'library/alpine')" "$(__os_running_version)" "Docker latest image version must equal running version"
  _health_assert "$(_docker_latest_version 'gautada/alpine')" "$(__os_running_version)" "Container latest image version must equal running version"
 }
-
-
 
