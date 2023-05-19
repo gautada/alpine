@@ -61,7 +61,7 @@ _health_assert() {
 
 # _health_docker_version "library/debian"
 
-_container_health_check() {
+_initial_health_check() {
  for script in /etc/container/health.d/*.health ; do
   if [ -r "$script" ] ; then
    echo "Checking container health with script: $script"
@@ -72,4 +72,14 @@ _container_health_check() {
  unset script
  echo "~~~~~~~~~~~~~~~~~~~~~"
  echo "$HOSTNAME - container is healthy"
+ touch ~/.cache/initial.health
 }
+
+_container_health_check() {
+ if [ -f "~/.cache/initial.health" ] ; then
+  exit 0
+ else
+  _initial_health_check
+ fi
+}
+
