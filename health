@@ -78,7 +78,7 @@ _container_health() {
 }
 
 _container_test() {
- for script in /etc/container/test.d/*.test ; do
+ for script in /etc/container/health.d/*.test ; do
   if [ -r "$script" ] ; then
    echo "Testing container with script: $script"
    . "$script"
@@ -88,3 +88,4 @@ _container_test() {
  unset script
  echo "~~~~~~~~~~~~~~~~~~~~~"
  echo "$HOSTNAME - container is tested"
+}

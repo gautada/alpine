@@ -5,7 +5,7 @@
 # `/etc/container/test.d/*.health`. This script is usually called from the drone cicd 
 # script. 
 
-DEFAULT="/etc/container/test"
+DEFAULT="/etc/container/health"
 if [ -x "$DEFAULT" ]; then
  echo "[W] Running default container test"
  . $DEFAULT
