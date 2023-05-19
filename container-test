@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# This script is the control script to test a container. The default behavior is to 
+# call the `/etc/container/test` script which will load and run all specific scripts in 
+# `/etc/container/test.d/*.health`. This script is usually called from the drone cicd 
+# script. 
+
+DEFAULT="/etc/container/test"
+if [ -x "$DEFAULT" ]; then
+ echo "[W] Running default container test"
+ . $DEFAULT
+ _container_test
+ exit $?
+else
+ echo "[E] No test script found"
+ exit 1
+fi

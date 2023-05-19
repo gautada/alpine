@@ -115,8 +115,11 @@ RUN /bin/mkdir -p /etc/container/health.d \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-liveness \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-readiness \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-startup
-COPY os.health /etc/container/health.d/os.health
 COPY cron.health /etc/container/health.d/cron.health
+# *** TESTING ***╯  
+COPY container-test /usr/bin/container-test
+RUN /bin/mkdir -p /etc/container/test.d 
+COPY os.test /etc/container/health.d/os.test
 
 # ╭――――――――――――――――――――╮
 # │USER                │

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# This is the default container health script. The default behavior is to loop 
-# through all of the scripts in `/etc/container/health.d` and execute.
+# This is the default script for checking the health and testing of a container. The default behavior is to loop 
+# through all of the scripts in `/etc/container/health.d` or `/etc/container/test.d` and execute.
 
 _MAX=72
 _PASS="[+]"
@@ -48,7 +48,12 @@ _docker_latest_version() {
  done 
 }
 
-_health_assert() {
+_proc_check() {
+ /usr/bin/pgrep $1 > /dev/null
+ echo "$?"
+}
+
+_assert() {
  # echo "$@"
  _MSG="$(_health_msg $3)"
  if [ "$1" = "$2" ] ; then
@@ -59,27 +64,27 @@ _health_assert() {
  fi
 }
 
-# _health_docker_version "library/debian"
-
-_initial_health_check() {
+_container_health() {
  for script in /etc/container/health.d/*.health ; do
   if [ -r "$script" ] ; then
    echo "Checking container health with script: $script"
    . "$script"
-   __health_check
+   __check
   fi
  done
  unset script
  echo "~~~~~~~~~~~~~~~~~~~~~"
  echo "$HOSTNAME - container is healthy"
- touch ~/.cache/initial.health
 }
 
-_container_health_check() {
- if [ -f "~/.cache/initial.health" ] ; then
-  exit 0
- else
-  _initial_health_check
- fi
-}
-
+_container_test() {
+ for script in /etc/container/test.d/*.test ; do
+  if [ -r "$script" ] ; then
+   echo "Testing container with script: $script"
+   . "$script"
+   __test
+  fi
+ done
+ unset script
+ echo "~~~~~~~~~~~~~~~~~~~~~"
+ echo "$HOSTNAME - container is tested"

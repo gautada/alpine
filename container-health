@@ -36,7 +36,7 @@ DEFAULT="/etc/container/health"
 if [ -x "$DEFAULT" ]; then
  echo "[W] Running default container health check"
  . $DEFAULT
- _container_health_check
+ _container_health
  exit $?
 else
  echo "[E] No health check scripts found"
