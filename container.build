@@ -147,9 +147,9 @@ WORKDIR /home/$USER
 # not matter if this is pulled for all downstream containers as it is 
 # relatively small
 
-RUN /bin/mkdir -p /home/$USER/.config/repo \
- && git clone https://github.com/gautada/config.git \
-              /home/$USER/.config/repo/public
+RUN /bin/mkdir -p /home/$USER/.config/repo 
+WORKDIR /home/$USER/.config/repo
+RUN git clone https://github.com/gautada/config.git public
 
 # *** ZSH ***
 RUN /bin/ln -fsv /home/$USER/.config/repo/public/zsh /home/$USER/.config/zsh
