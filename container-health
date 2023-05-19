@@ -30,6 +30,7 @@ health_override() {
 health_override $0 "liveness"
 health_override $0 "readiness"
 health_override $0 "startup"
+# health_override $0 "test"
 health_override $0 "health"
 
 DEFAULT="/etc/container/health"
