@@ -20,19 +20,13 @@ _health_print() {
 _docker_latest_version() {
  # Check the docker.io registry for the latest image version number
  response=$(curl -sSL "https://registry.hub.docker.com/v2/repositories/$1/tags?page_size=1000")
- # echo "$response"
  # Parse the JSON response to extract the latest image
  latest=$(echo "$response" | jq -r '.results[] | select(.name == "latest")')
- # echo "$latest" | jq .
  # Parse to get digest
  digest=$(echo "$latest" | jq -r '.digest')
- # echo "$digest"
  # Pull all names of images where the digest matches latest
  results=$(echo "$response" | jq -r --arg digest "$digest" '.results[] | select(.digest == $digest) | .name' | tr '\n' ' ')
- # echo "[$results]"
  for result in $results; do
- # echo $results | while IFS= read -r result; do
-  # print if in major.minor.revision or major.minor format
   case "$result" in
    *.*.*)
     echo "$result"
@@ -60,32 +54,23 @@ _assert() {
   _health_print "$3" $_PASS
  else
   _health_print "$3" $_FAIL "[$1 - $2]"
-  exit 1
+  exit 99
  fi
 }
 
 _container_health() {
- for script in /etc/container/health.d/*.health ; do
+ FUNC=$1
+ # echo "$FUNC"
+ for script in /etc/container/health.d/*.$FUNC ; do
   if [ -r "$script" ] ; then
-   echo "Checking container health with script: $script"
+   echo "Checking health script: $script"
    . "$script"
    __check
   fi
  done
  unset script
  echo "~~~~~~~~~~~~~~~~~~~~~"
- echo "$HOSTNAME - container is healthy"
+ echo "$HOSTNAME - container healthy"
 }
 
-_container_test() {
- for script in /etc/container/health.d/*.test ; do
-  if [ -r "$script" ] ; then
-   echo "Testing container with script: $script"
-   . "$script"
-   __test
-  fi
- done
- unset script
- echo "~~~~~~~~~~~~~~~~~~~~~"
- echo "$HOSTNAME - container is tested"
-}
+
