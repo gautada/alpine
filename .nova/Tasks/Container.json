@@ -1,9 +1,0 @@
-{
-  "actions" : {
-    "build" : {
-      "enabled" : true,
-      "path" : "\/Users\/mada\/.config\/nova\/container-build"
-    }
-  },
-  "openLogOnRun" : "start"
-}
