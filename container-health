@@ -9,27 +9,28 @@
 # respective file `/etc/container/[liveness, readiness, and/or startup]` that defines the
 # desired behavior
 
-HEALTH="/etc/container/health"
-if [ ! -f "$HEALTH" ]; then
- echo "Health function not defined"
- exit 1
-fi
+# HEALTH="/etc/container/health"
+# if [ ! -f "$HEALTH" ]; then
+#  echo "Health function not defined"
+#  exit 1
+# fi
+# 
+# # Parse the function from the executed script
+# FUNC="$(echo $0 | awk -F '-' '{print $2}')"
+# # Load the health script for _container_health function
+# . $HEALTH
+# case $FUNC in
+#  "liveness" | "readiness" | "startup" | "test")
+#   _container_health "$FUNC"
+#   _container_health "health"
+#  ;;
+#  "health")
+#   _container_health "health"
+#  ;;
+#  *)
+#   echo "Unknown function[$FUNC]"
+#   exit 2
+#  ;;
+# esac
 
-# Parse the function from the executed script
-FUNC="$(echo $0 | awk -F '-' '{print $2}')"
-# Load the health script for _container_health function
-. $HEALTH
-case $FUNC in
- "liveness" | "readiness" | "startup" | "test")
-  _container_health "$FUNC"
-  _container_health "health"
- ;;
- "health")
-  _container_health "health"
- ;;
- *)
-  echo "Unknown function[$FUNC]"
-  exit 2
- ;;
-esac
-
+exit 0

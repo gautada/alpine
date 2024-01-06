@@ -41,22 +41,22 @@ steps:
     - main
 
 
-- name: deploy
-  failure: ignore
-  environment:
-    DRONE_SERVER:
-      from_secret: server.drone.io
-    DRONE_TOKEN:
-      from_secret: token.drone.io
-  commands:
-  - /usr/bin/drone build create --branch main gautada/drone-container
-  - /usr/bin/drone build create --branch main gautada/gitea-container
-  - /usr/bin/drone build create --branch main gautada/postgresql-container
-  when:
-    branch:
-    - main
-    
-trigger:
-  event:
-  - push
+# - name: deploy
+#   failure: ignore
+#   environment:
+#     DRONE_SERVER:
+#       from_secret: server.drone.io
+#     DRONE_TOKEN:
+#       from_secret: token.drone.io
+#   commands:
+#   - /usr/bin/drone build create --branch main gautada/drone-container
+#   - /usr/bin/drone build create --branch main gautada/gitea-container
+#   - /usr/bin/drone build create --branch main gautada/postgresql-container
+#   when:
+#     branch:
+#     - main
+#     
+# trigger:
+#   event:
+#   - push
 
