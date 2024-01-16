@@ -1,2 +1,11 @@
+# Sudo configuration file. This can be overridden with downstream containers.
+#
+# This provides elevated access as needed for the user of the container.
+#
+
+  
 %privileged ALL = (ALL) NOPASSWD: /usr/sbin/crond
-%privileged ALL = (ALL) NOPASSWD: /usr/bin/apt-get
+%privileged ALL = (ALL) NOPASSWD: /usr/bin/container-backup
+
+# Enable only for debugging
+# %privileged ALL = (ALL) NOPASSWD: /usr/bin/apt-get
