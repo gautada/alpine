@@ -2,7 +2,7 @@
 set -xe
 
 USER=$(awk -F':' -v uid=1001 '$3 == uid { print $1 }' /etc/passwd)
-BACKUP="/temp/backup"
+BACKUP="/tmp/backup"
 CACHE="$BACKUP/cache"
 /bin/mkdir -p $CACHE
 
