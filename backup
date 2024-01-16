@@ -5,7 +5,8 @@
 container_backup() {
  echo "[ INFO] Current directory($(/bin/pwd))"
  echo "[ WARN] Default container backup function not customized for container"
- /bin/cp -r /mnt/volumes/container/* ./
+ echo "$(date +%s)" > data
+ # removed because this could produce too much data
+ # /bin/cp -r /mnt/volumes/container/* ./
  return $?
- # echo "$(date +%s)" > /tmp/backup/.date
 }
