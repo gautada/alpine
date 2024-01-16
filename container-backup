@@ -1,51 +1,39 @@
 #!/bin/sh
+set -xe
 
-<<<<<<< HEAD
-export SIGN_PASSPHRASE="$(cat /mnt/volumes/secrets/namespace/signer.pwd)"
-source /etc/container/backup-functions
+USER=$(awk -F':' -v uid=1001 '$3 == uid { print $1 }' /etc/passwd)
+BACKUP="/temp/backup"
+CACHE="$BACKUP/cache"
+/bin/mkdir -p $CACHE
 
-=======
-# New container backup.  Should securely create a tarball archive of all relevant container data in the /mnt/volumes/backup/<container> 
-# directory by calling the backup function
->>>>>>> fb2b1a9 (Added files and updated for the new base container layout)
+/bin/chown 1001:1001 $CACHE
+cd $CACHE
 
-echo "-------------------"
-
-BKUP="/tmp/backup"
-/bin/mkdir -p $BKUP
-cd $TEMP
-
-TEMP="$(/bin/mktemp --directory $BKUP/XXXXX)"
-# echo $TEMP
-/bin/mkdir -p $TEMP
-
-/bin/chown $(/usr/bin/id -un 1001):$(/usr/bin/id -un 1001) $TEMP
-cd $TEMP
-
-/bin/su $(/usr/bin/id -un 1001) -c ". /etc/container/backup ; app_backup"
-
-# pwd
-# echo "$BKUP/$HOSTNAME.tar"
-# echo "-------------------"
-# export
-# echo
-# echo
-
-ARCHIVE="$BKUP/$(echo $HOSTNAME).tgz"
+/bin/su $USER -c ". /etc/container/backup ; container_backup"
+ARCHIVE="$BACKUP/$(/bin/date +'%Y%m%d-%H%M%S')-$(echo $HOSTNAME).tgz"
 /bin/tar  --create --gzip --file=$ARCHIVE --verbose ./*
 
-if [ -f /mnt/volumes/backup/.backup ] ; then
- echo "Backup lock is active"
+if [ ! -f /mnt/volumes/backup/.archive ] ; then
+ /bin/touch /mnt/volumes/backup/.backup
+ /bin/mv -v $ARCHIVE /mnt/volumes/backup/
+ /bin/rm -f /mnt/volumes/backup/.backup
+ /bin/rm -rf $BACKUP
 fi
 
-if [ -f /mnt/volumes/backup/.archive ] ; then
- echo "Archive lock is active"
-fi
 
-/bin/touch /mnt/volumes/backup/.backup
-/bin/cp -v $ARCHIVE /mnt/volumes/backup/
-/bin/rm -f /mnt/volumes/backup/.backup
-/bin/rm -rf $BKUP
-echo "~~~~~~~~~~~~~~~~~~~"
+# Make the temporary directory for making the backup
+# TEMP="$(/bin/mktemp --directory $BACKUP/XXXXX)"
+# /bin/mkdir -p $TEMP
+# Make sure the temporary directory is owned by the default user
+# Change to the temporary directory
+# cd $TEMP
+
+# Execute the container_backup function (should dump all files to be backed up in
+# the temporary directory
+# if [ -f /mnt/volumes/backup/.backup ] ; then
+#  echo "Backup lock is active"
+# fi
+
+# Push out the tarball to the backup NFS location
 
 
