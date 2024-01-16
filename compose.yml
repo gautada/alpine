@@ -12,7 +12,7 @@ services:
         - "alpine:dev"
         - "gautada/alpine:dev"
     image: "alpine:dev"
-    hostname: alpine
+    hostname: "alpine"
     ports:
       - "8888:8080"
     volumes:
