@@ -16,19 +16,27 @@ services:
     ports:
       - "8888:8080"
     volumes:
-      # - "/Users/mada/Workspace/Container:/mnt/volumes/container"
-      # - "/Users/mada/Workspace/Backup:/mnt/volumes/backup"
-      # - "/mnt/volumes/container/Workspace/Container:/mnt/volumes/container"
-      # - "/mnt/volumes/container/Workspace/Backup:/mnt/volumes/backup"
       - "Container:/mnt/volumes/container"
       - "Backup:/mnt/volumes/backup"
-        
+      - "Configmaps:/mnt/volumes/configmaps"
+      - "Secrets:/mnt/volumes/Secrets"
+      
 volumes:
   Container:
     external: true
     name: "Container"
-
+  
   Backup:
     external: true
     name: "Backup"
-      
+
+  Configmaps:
+    external: true
+    name: "Configmaps"
+
+  Secrets:
+    external: true
+    name: "Secrets"
+
+
+

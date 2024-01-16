@@ -79,7 +79,9 @@ RUN /bin/ln -fsv /mnt/volumes/secrets/container/ca.crt \
 # │ BACKUP            │
 # ╰―――――――――――――――――――╯
 COPY container-backup /usr/bin/container-backup
-RUN /bin/ln -fsv /mnt/volumes/container/backup /etc/container/backup
+# COPY backup-functions /etc/container/backup-functions
+# RUN /bin/ln -fsv /mnt/volumes/container/backup /etc/container/backup
+COPY backup /etc/container/backup
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
