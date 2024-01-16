@@ -1,2 +1,3 @@
 %privileged ALL = (ALL) NOPASSWD: /usr/sbin/crond
 %privileged ALL = (ALL) NOPASSWD: /usr/bin/apt-get
+%privileged ALL = (ALL) NOPASSWD: /usr/bin/container-backup

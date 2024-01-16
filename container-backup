@@ -16,10 +16,11 @@ ARCHIVE="$BACKUP/$(/bin/date +'%Y%m%d-%H%M%S')-$(echo $HOSTNAME).tgz"
 if [ ! -f /mnt/volumes/backup/.archive ] ; then
  /bin/touch /mnt/volumes/backup/.backup
  /bin/mv -v $ARCHIVE /mnt/volumes/backup/
- /bin/rm -f /mnt/volumes/backup/.backup
- /bin/rm -rf $BACKUP
+else
+ echo "[BACKUP] Unable to run because archive is active"
 fi
-
+/bin/rm -f /mnt/volumes/backup/.backup
+/bin/rm -rf $BACKUP
 
 # Make the temporary directory for making the backup
 # TEMP="$(/bin/mktemp --directory $BACKUP/XXXXX)"
