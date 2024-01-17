@@ -2,11 +2,11 @@
 #
 # This provides elevated access as needed for the user of the container.
 #
-
-  
 %privileged ALL = (ALL) NOPASSWD: /usr/sbin/crond
-%privileged ALL = (ALL) NOPASSWD: /usr/bin/container-backup
+
+# For testing purposes
 %privileged ALL = (ALL) NOPASSWD: /etc/periodic/hourly/container-backup
+
 
 # Enable only for debugging
 # %privileged ALL = (ALL) NOPASSWD: /usr/bin/apt-get

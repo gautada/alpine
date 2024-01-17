@@ -9,7 +9,7 @@ CACHE="$BACKUP/cache"
 /bin/chown 1001:1001 $CACHE
 cd $CACHE
 
-/bin/su 1001 -c ". /etc/container/backup ; container_backup"
+/bin/su $USER -c ". /etc/container/backup ; container_backup"
 ARCHIVE="$BACKUP/$(/bin/date +'%Y%m%d-%H%M%S')-$(echo $HOSTNAME).tgz"
 /bin/tar  --create --gzip --file=$ARCHIVE --verbose ./*
 
