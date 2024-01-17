@@ -9,17 +9,18 @@ services:
       dockerfile: container.build
       no_cache: true
       tags:
-        - "alpine:dev"
-        - "gautada/alpine:dev"
-    image: "alpine:dev"
-    hostname: "alpine"
+        - "alpine:build"
+        - "gautada/alpine:build"
+        - "gautada/alpine:latest"
+    image: "alpine:build"
+    hostname: alpine
     ports:
       - "8888:8080"
     volumes:
       - "Container:/mnt/volumes/container"
       - "Backup:/mnt/volumes/backup"
       - "Configmaps:/mnt/volumes/configmaps"
-      - "Secrets:/mnt/volumes/Secrets"
+      - "Secrets:/mnt/volumes/secrets"
       
 volumes:
   Container:
