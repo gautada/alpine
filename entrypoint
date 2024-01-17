@@ -13,4 +13,5 @@ container_version() {
 
 container_entrypoint() {
  /bin/echo "This is the default entrypoint. You should overload the 'container_entrypoint()' function."
+ /usr/bin/tail -f /dev/null
 }

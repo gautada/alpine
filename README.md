@@ -155,3 +155,10 @@ docker run -it --rm --name drone --publish 8080:8080 --volume=/Users/mada/Worksp
 ```
 
 
+
+
+
+
+
+
+
