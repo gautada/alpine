@@ -1,4 +1,7 @@
 #!/bin/sh
+
+# Backup script calls the containers backup function and then archives 
+# the backup data into the hour's tar ball.
 set -xe
 
 USER=$(awk -F':' -v uid=1001 '$3 == uid { print $1 }' /etc/passwd)
@@ -10,31 +13,7 @@ CACHE="$BACKUP/cache"
 cd $CACHE
 
 /bin/su $USER -c ". /etc/container/backup ; container_backup"
-ARCHIVE="$BACKUP/$(/bin/date +'%Y%m%d-%H%M%S')-$(echo $HOSTNAME).tgz"
+ARCHIVE="$BACKUP/$(/bin/date +%H)-$(echo $HOSTNAME).tgz"
 /bin/tar  --create --gzip --file=$ARCHIVE --verbose ./*
-
-if [ ! -f /mnt/volumes/backup/.archive ] ; then
- /bin/touch /mnt/volumes/backup/.backup
- /bin/mv -v $ARCHIVE /mnt/volumes/backup/
-else
- echo "[BACKUP] Unable to run because archive is active"
-fi
-/bin/rm -f /mnt/volumes/backup/.backup
-/bin/rm -rf $BACKUP
-
-# Make the temporary directory for making the backup
-# TEMP="$(/bin/mktemp --directory $BACKUP/XXXXX)"
-# /bin/mkdir -p $TEMP
-# Make sure the temporary directory is owned by the default user
-# Change to the temporary directory
-# cd $TEMP
-
-# Execute the container_backup function (should dump all files to be backed up in
-# the temporary directory
-# if [ -f /mnt/volumes/backup/.backup ] ; then
-#  echo "Backup lock is active"
-# fi
-
-# Push out the tarball to the backup NFS location
-
+/bin/mv -v $ARCHIVE /mnt/volumes/backup/
 
