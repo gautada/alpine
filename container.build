@@ -85,7 +85,7 @@ COPY os.test /etc/container/health.d/os.test
 # ╰――――――――――――――――――――
 ARG USER=alpine
 ARG UID=1001
-ARG GID=$UID  
+ARG GID=1001  
 RUN /usr/sbin/groupadd --gid $UID $USER
 RUN /usr/sbin/useradd --create-home --gid $GID --shell /bin/zsh --uid $UID $USER
 RUN /usr/sbin/adduser $USER privileged
