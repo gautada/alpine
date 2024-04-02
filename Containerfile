@@ -65,6 +65,9 @@ RUN /bin/ln -fsv /etc/container/privileges /etc/sudoers.d/privileges \
 # │ VERSION            │
 # ╰――――――――――――――――――――╯
 COPY container-version /usr/bin/container-version
+COPY commit /etc/container/version.d/00...
+COPY commit /etc/container/version.d/00...
+COPY commit /etc/container/version.d/00...
 
 # ╭―
 # │ HEALTH
