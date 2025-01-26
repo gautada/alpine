@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.18.5
+ARG ALPINE_VERSION=3.21.2
 # ╭―――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
 # │                                                                           │
 # │ CONTAINER BUILD                                                           │
@@ -27,7 +27,7 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps \
 # *** SHELL ***
 RUN /sbin/apk add --no-cache zsh \
 # *** NETWORKING ***
- && /sbin/apk add --no-cache bind-tools curl iputils nmap nmap-ncat \
+ && /sbin/apk add --no-cache bind-tools ca-certificates curl iputils nmap nmap-ncat \
 # *** UTILS ***
  && /sbin/apk add --no-cache git jq nano shadow sudo tzdata 
 
@@ -57,6 +57,8 @@ COPY entrypoint /etc/container/entrypoint
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
 # ╰――――――――――――――――――――╯
+# COPY privileges /etc/container/alpine
+# RUN  /usr/sbin/groupadd --gid 99 privileged
 COPY privileges /etc/container/privileges
 RUN /bin/ln -fsv /etc/container/privileges /etc/sudoers.d/privileges \
  && /usr/sbin/groupadd --gid 99 privileged
@@ -64,10 +66,7 @@ RUN /bin/ln -fsv /etc/container/privileges /etc/sudoers.d/privileges \
 # ╭――――――――――――――――――――╮
 # │ VERSION            │
 # ╰――――――――――――――――――――╯
-COPY container-version /usr/bin/container-version
-COPY commit /etc/container/version.d/00...
-COPY commit /etc/container/version.d/00...
-COPY commit /etc/container/version.d/00...
+# COPY base-version /usr/bin/container-version
 
 # ╭―
 # │ HEALTH
