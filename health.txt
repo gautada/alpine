@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # This is the default script for checking the health and testing of a container. The default behavior is to loop 
 # through all of the scripts in `/etc/container/health.d` or `/etc/container/test.d` and execute.
 
