@@ -55,7 +55,7 @@ RUN /bin/mkdir -p /etc/container \
 COPY container-backup /usr/bin/container-backup
 RUN /bin/ln -fsv /usr/bin/container-backup \
                  /etc/periodic/hourly/container-backup
-COPY backup /etc/container/backup
+COPY backup.sh /etc/container/backup
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
@@ -95,13 +95,15 @@ COPY os.test /etc/container/health.d/os.test
 ARG USER=alpine
 ARG UID=1001
 ARG GID=1001
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN /usr/sbin/groupadd --gid $UID $USER \
  && /usr/sbin/useradd --create-home \
                       --gid $GID \
                       --shell /bin/zsh \
                       --uid $UID $USER \
  && /usr/sbin/adduser $USER privileged \
- && /usr/sbin/chpasswd << "$USER:$USER" \
+#  && /usr/sbin/chpasswd << "$USER:$USER" \
+ && echo "$USER:$USER" | /usr/sbin/chpasswd \
  && /bin/chown -R $USER:$USER /mnt/volumes/container \
  && /bin/chown -R $USER:$USER /mnt/volumes/backup \
  && /bin/chown -R $USER:$USER /mnt/volumes/configmaps \

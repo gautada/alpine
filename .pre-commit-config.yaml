@@ -6,5 +6,13 @@ repos:
         name: Hadolint Linter
         entry: hadolint
         language: system
-        files: '.*Containerfile.*'
+        files: 'Containerfile$'
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0  # Use latest stable version
+    hooks:
+      - id: shellcheck
+        name: ShellCheck Linter
+        entry: shellcheck
+        language: system
+        files: '\.*sh$'  # Runs on all .sh files
 
