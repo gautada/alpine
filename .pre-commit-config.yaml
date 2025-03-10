@@ -1,3 +1,4 @@
+---
 repos:
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.0  # Use the latest stable version
@@ -23,4 +24,11 @@ repos:
         entry: markdownlint
         language: node
         files: '\.md$'
-
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.32.0  # Use the latest stable version
+    hooks:
+      - id: yamllint
+        name: YAML Linter
+        entry: yamllint
+        language: python
+        files: '\.ya?ml$'
