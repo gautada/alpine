@@ -74,7 +74,7 @@ RUN /bin/ln -fsv /etc/container/privileges \
 # ╭――――――――――――――――――――╮
 # │ VERSION            │
 # ╰――――――――――――――――――――╯
-# COPY base-version /usr/bin/container-version
+COPY container-version.sh /usr/bin/container-version
 
 # ╭―
 # │ HEALTH

@@ -5,5 +5,5 @@
 
 
 container_version() {
- echo "$(base_version)"
+ $(base_version)
 }

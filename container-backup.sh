@@ -12,9 +12,9 @@ CACHE="$BACKUP/cache"
 /bin/chown 1001:1001 $CACHE
 cd $CACHE
 
-/bin/su $USER -c ". /etc/container/backup ; container_backup"
-CONTAINER="$(echo $HOSTNAME | awk -F '-' '{print $1}')"
+/bin/su "$USER" -c ". /etc/container/backup ; container_backup"
+CONTAINER="$(/bin/hostname | awk -F '-' '{print $1}')"
 ARCHIVE="$BACKUP/$(/bin/date +%H)-$CONTAINER.tgz"
-/bin/tar  --create --gzip --file=$ARCHIVE --verbose ./*
-/bin/mv -v $ARCHIVE /mnt/volumes/backup/
+/bin/tar  --create --gzip --file="$ARCHIVE" --verbose ./*
+/bin/mv -v "$ARCHIVE" /mnt/volumes/backup/
 
