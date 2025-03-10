@@ -27,8 +27,8 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps \
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-RUN /bin/sed -i 's|dl-cdn.alpinelinux.org/alpine/|mirror.math.princeton.edu/pub/alpinelinux/|g' /etc/apk/repositories
-RUN /sbin/apk add --no-cache zsh \
+RUN /bin/sed -i 's|dl-cdn.alpinelinux.org/alpine/|mirror.math.princeton.edu/pub/alpinelinux/|g' /etc/apk/repositories \
+ && /sbin/apk add --no-cache zsh \
                              bind-tools \
                              ca-certificates \
                              curl \
@@ -45,7 +45,6 @@ RUN /sbin/apk add --no-cache zsh \
 # ╭―――――――――――――――――――╮
 # │ CONFIG (ROOT)     │
 # ╰―――――――――――――――――――╯
-# --- [ GENERAL - OS LEVEL CONFIG ] ---
 RUN /bin/mkdir -p /etc/container \
  && echo "America/New_York" > /etc/timezone \
  && /bin/ln -fsv /usr/share/zoneinfo/$(cat /etc/timezone) /etc/localtime
@@ -88,15 +87,15 @@ RUN /bin/mkdir -p /etc/container/health.d \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-startup \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-test
 COPY cron.health /etc/container/health.d/cron.health
-# *** TESTING ***
 COPY os.test /etc/container/health.d/os.test
 
-# ╭―
-# │ USER
-# ╰――――――――――――――――――――
+# ╭――――――――――――――――――――╮
+# │ USE                │
+# ╰――――――――――――――――――――╯
 ARG USER=alpine
 ARG UID=1001
-ARG GID=1001  
+ARG GID=1001
+# hadolint ignore=DL4006  
 RUN /usr/sbin/groupadd --gid $UID $USER \
  && /usr/sbin/useradd --create-home \
                       --gid $GID \
