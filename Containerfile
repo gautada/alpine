@@ -45,7 +45,7 @@ RUN /bin/sed -i 's|dl-cdn.alpinelinux.org/alpine/|mirror.math.princeton.edu/pub/
 # ╭―――――――――――――――――――╮
 # │ CONFIG (ROOT)     │
 # ╰―――――――――――――――――――╯
-RUN /bin/mkdir -p /etc/container \
+RUN /bin/mkdir -p "/etc/container" \
  && echo "America/New_York" > /etc/timezone \
  && /bin/ln -fsv /usr/share/zoneinfo/$(cat /etc/timezone) /etc/localtime
  
@@ -90,18 +90,19 @@ COPY cron.health /etc/container/health.d/cron.health
 COPY os.test /etc/container/health.d/os.test
 
 # ╭――――――――――――――――――――╮
-# │ USE                │
+# │ USER               │
 # ╰――――――――――――――――――――╯
 ARG USER=alpine
 ARG UID=1001
 ARG GID=1001
-# hadolint ignore=DL4006  
+  
 RUN /usr/sbin/groupadd --gid $UID $USER \
  && /usr/sbin/useradd --create-home \
                       --gid $GID \
                       --shell /bin/zsh \
                       --uid $UID $USER \
  && /usr/sbin/adduser $USER privileged \
+# hadolint ignore=DL4006 
  && /bin/echo "$USER:$USER" | /usr/sbin/chpasswd \
  && /bin/chown -R $USER:$USER /mnt/volumes/container \
  && /bin/chown -R $USER:$USER /mnt/volumes/backup \
@@ -121,5 +122,5 @@ VOLUME /mnt/volumes/secrets
 # VOLUME /mnt/volumes/secrets/namespace
 # VOLUME /mnt/volumes/secrets/container
 # EXPOSE 8080/tcp
-USER root
+# USER root
 WORKDIR /

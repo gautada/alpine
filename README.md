@@ -125,7 +125,7 @@ The official to list is kept in a [GitHub Issue List]{(https://github.com/gautad
 - Lookup if an [exitpoint](https://github.com/gautada/alpine-container/issues/19) can be worked in via a script in `/etc/profile`.
 - Bastion service was an access mechanism that allowed for ssh access.  This was dropped in favor of `docker exec`.
 - Log rotate is a way to limit the size of logs for long running container.  The containers should log everything to /dev/stdout.
-- Scripts - Maybe use `set -xe` for debugging. See: [The Set Builtin](https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin). I think this might only be for bash
+- Scripts - Maybe use `set -xe` for debugging. See: [The Set Built-in](https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin). I think this might only be for bash
 - HEALTHCHECK is a complicated issue.  A discussed in the [OCI's image spec](https://github.com/opencontainers/image-spec/issues/749) project. This is an container instance issue not an image specification.  This note is just here for future reference and should be documented in the architecture.
 - 2024-02-07: Updated the UID/GID configuration
 
