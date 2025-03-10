@@ -101,7 +101,7 @@ RUN /usr/sbin/groupadd --gid $UID $USER \
                       --shell /bin/zsh \
                       --uid $UID $USER \
  && /usr/sbin/adduser $USER privileged \
- && /bin/echo /usr/sbin/chpasswd << "$USER:$USER" \
+ && /usr/sbin/chpasswd << "$USER:$USER" \
  && /bin/chown -R $USER:$USER /mnt/volumes/container \
  && /bin/chown -R $USER:$USER /mnt/volumes/backup \
  && /bin/chown -R $USER:$USER /mnt/volumes/configmaps \
