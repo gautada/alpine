@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # This is the default script for checking the health and testing of a container. The default behavior is to loop 
 # through all of the scripts in `/etc/container/health.d` or `/etc/container/test.d` and execute.
 
@@ -9,7 +7,7 @@ _FAIL="[-]"
 
 _health_msg() {
  # printf '%.*s' "$_MAX" "$1"
- echo $1
+ echo "$1"
 }
 
 _health_print() {
@@ -43,23 +41,23 @@ _docker_latest_version() {
 }
 
 _proc_check() {
- /usr/bin/pgrep $1 > /dev/null
+ /usr/bin/pgrep "$1" > /dev/null
  echo "$?"
 }
 
 _assert() {
  # echo "$@"
- _MSG="$(_health_msg $3)"
+ _MSG=$(_health_msg "$3")
  if [ "$1" = "$2" ] ; then
-  _health_print "$3" $_PASS
+  _health_print "$3" "$_PASS"
  else
-  _health_print "$3" $_FAIL "[$1 - $2]"
+  _health_print "$3" "$_FAIL" "[$1 - $2]"
   exit 99
  fi
 }
 
 _container_health() {
- FUNC=$1
+ FUNC="$1"
  # echo "$FUNC"
  for script in /etc/container/health.d/*.$FUNC ; do
   if [ -r "$script" ] ; then

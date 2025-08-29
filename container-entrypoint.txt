@@ -1,4 +1,4 @@
-#!/bin/sh
+
 #
 # [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint) is the default
 # initial process which and executes all the applications and services that run in a container.

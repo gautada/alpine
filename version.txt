@@ -1,0 +1,9 @@
+#!/bin/sh
+# container-8.3.5.a0b9c(alpine-3.19.1.x1y2z3)
+
+
+
+
+container_version() {
+ eval base_version
+}

@@ -3,6 +3,7 @@
 # This provides elevated access as needed for the user of the container.
 #
 %privileged ALL = (ALL) NOPASSWD: /usr/sbin/crond
+%privileged ALL = (ALL) NOPASSWD: /usr/sbin/update-ca-certificates
 
 # For testing purposes
 %privileged ALL = (ALL) NOPASSWD: /etc/periodic/hourly/container-backup

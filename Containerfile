@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.18.5
+ARG ALPINE_VERSION="${IMAGE_VERSION:-'3.22.1'}"
 # ╭―――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
 # │                                                                           │
 # │ CONTAINER BUILD                                                           │
@@ -9,9 +9,12 @@ FROM alpine:$ALPINE_VERSION as container
 # ╭――――――――――――――――――――╮
 # │ METADATA           │
 # ╰――――――――――――――――――――╯
-LABEL source="https://github.com/gautada/alpine-container.git"
-LABEL maintainer="Adam Gautier <adam@gautier.org>"
-LABEL description="Alpine Linux base container."
+LABEL org.opencontainers.image.title="alpine"
+LABEL org.opencontainers.image.description="An Alpine base container."
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/gautada/alpine"
+LABEL org.opencontainers.image.source="https://github.com/gautada/alpine"
+LABEL org.opencontainers.image.version="${CONTAINER_VERSION}"
+LABEL org.opencontainers.image.license="Upstream"
 
 # ╭――――――――――――――――――――╮
 # │ VOLUMES            │
@@ -24,76 +27,87 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps \
 # ╭――――――――――――――――――――╮
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
-# *** SHELL ***
-RUN /sbin/apk add --no-cache zsh \
-# *** NETWORKING ***
- && /sbin/apk add --no-cache bind-tools curl iputils nmap nmap-ncat \
-# *** UTILS ***
- && /sbin/apk add --no-cache git jq nano shadow sudo tzdata 
+RUN /bin/sed -i 's|dl-cdn.alpinelinux.org/alpine/|mirror.math.princeton.edu/pub/alpinelinux/|g' /etc/apk/repositories \
+ && /sbin/apk add --no-cache zsh \
+                             bind-tools \
+                             ca-certificates \
+                             curl \
+                             iputils \
+                             nmap \
+                             nmap-ncat \
+                             git \
+                             jq \
+                             nano \
+                             shadow \
+                             sudo \
+                             tzdata 
 
 # ╭―――――――――――――――――――╮
 # │ CONFIG (ROOT)     │
 # ╰―――――――――――――――――――╯
-# --- [ GENERAL - OS LEVEL CONFIG ] ---
 RUN /bin/mkdir -p /etc/container \
-
-# *** TIMEZONE ***
  && echo "America/New_York" > /etc/timezone \
- && /bin/ln -fsv /usr/share/zoneinfo/$(cat /etc/timezone) /etc/localtime
+ && /bin/ln -fsv "/usr/share/zoneinfo/$(cat /etc/timezone)" /etc/localtime
  
 # ╭―――――――――――――――――――╮
 # │ BACKUP            │
 # ╰―――――――――――――――――――╯
-COPY container-backup /usr/bin/container-backup
-RUN /bin/ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup
-COPY backup /etc/container/backup
+# COPY container-backup /usr/bin/container-backup
+RUN /bin/ln -fsv /usr/bin/container-backup \
+                 /etc/periodic/hourly/container-backup
+COPY backup.sh /etc/container/backup
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-COPY container-entrypoint /usr/bin/container-entrypoint
-COPY entrypoint /etc/container/entrypoint
+# COPY container-entrypoint /usr/bin/container-entrypoint
+COPY entrypoint.sh /etc/container/entrypoint
 
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
 # ╰――――――――――――――――――――╯
 COPY privileges /etc/container/privileges
-RUN /bin/ln -fsv /etc/container/privileges /etc/sudoers.d/privileges \
+RUN /bin/ln -fsv /etc/container/privileges \
+                 /etc/sudoers.d/privileges \
  && /usr/sbin/groupadd --gid 99 privileged
  
 # ╭――――――――――――――――――――╮
 # │ VERSION            │
 # ╰――――――――――――――――――――╯
-COPY container-version /usr/bin/container-version
+COPY container-version.sh /usr/bin/container-version
 
 # ╭―
 # │ HEALTH
 # ╰―――――――――――――――――――― 
-COPY container-health /usr/bin/container-health
-COPY health /etc/container/health
+# COPY container-health /usr/bin/container-health
+# COPY health /etc/container/health
 RUN /bin/mkdir -p /etc/container/health.d \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-liveness \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-readiness \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-startup \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-test
-COPY cron.health /etc/container/health.d/cron.health
-# *** TESTING ***
-COPY os.test /etc/container/health.d/os.test
+# COPY cron.health /etc/container/health.d/cron.health
+# COPY os.test /etc/container/health.d/os.test
 
-# ╭―
-# │ USER
-# ╰――――――――――――――――――――
+# ╭――――――――――――――――――――╮
+# │ USER               │
+# ╰――――――――――――――――――――╯
 ARG USER=alpine
 ARG UID=1001
-ARG GID=1001  
-RUN /usr/sbin/groupadd --gid $UID $USER
-RUN /usr/sbin/useradd --create-home --gid $GID --shell /bin/zsh --uid $UID $USER
-RUN /usr/sbin/adduser $USER privileged
-RUN /bin/echo "$USER:$USER" | /usr/sbin/chpasswd
-RUN /bin/chown -R $USER:$USER /mnt/volumes/container
-RUN /bin/chown -R $USER:$USER /mnt/volumes/backup
-RUN /bin/chown -R $USER:$USER /mnt/volumes/configmaps
-RUN /bin/chown -R $USER:$USER /mnt/volumes/secrets
+ARG GID=1001
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+RUN /usr/sbin/groupadd --gid $UID $USER \
+ && /usr/sbin/useradd --create-home \
+                      --gid $GID \
+                      --shell /bin/zsh \
+                      --uid $UID $USER \
+ && /usr/sbin/adduser $USER privileged \
+#  && /usr/sbin/chpasswd << "$USER:$USER" \
+ && echo "$USER:$USER" | /usr/sbin/chpasswd \
+ && /bin/chown -R $USER:$USER /mnt/volumes/container \
+ && /bin/chown -R $USER:$USER /mnt/volumes/backup \
+ && /bin/chown -R $USER:$USER /mnt/volumes/configmaps \
+ && /bin/chown -R $USER:$USER /mnt/volumes/secrets
 
 # ╭―
 # │ FINAL CONTAINER
@@ -108,5 +122,5 @@ VOLUME /mnt/volumes/secrets
 # VOLUME /mnt/volumes/secrets/namespace
 # VOLUME /mnt/volumes/secrets/container
 # EXPOSE 8080/tcp
-USER root
+# USER root
 WORKDIR /

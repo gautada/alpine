@@ -1,5 +1,0 @@
-#!/bin/sh
-
-. /etc/container/entrypoint
-container_version
-
