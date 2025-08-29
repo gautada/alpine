@@ -31,11 +31,11 @@ jobs:
           # DEFAULT_BRANCH: dev
           # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Read .arg file and export variables
+      - name: Read .args file and export variables
         run: |
           while IFS='=' read -r key value; do
           echo "$key=$value" >> "$GITHUB_ENV"
-          done < .arg
+          done < .args
 
       - name: "Set up packages"
         # QEMU for aarch64 (using emulation)
@@ -98,8 +98,10 @@ jobs:
           # Create manifest list
           /usr/bin/podman manifest create "$IMG_NAME:$TAG"
           # Add individual architecture images to manifest
-          /usr/bin/podman manifest add "$IMG_NAME:$TAG" "$P_IMG/$IMG_NAME:$TAG-amd64"
-          /usr/bin/podman manifest add "$IMG_NAME:$TAG" "$P_IMG/$IMG_NAME:$TAG-aarch64"
+          /usr/bin/podman manifest add "$IMG_NAME:$TAG" \
+                                       "$P_IMG/$IMG_NAME:$TAG-amd64"
+          /usr/bin/podman manifest add "$IMG_NAME:$TAG" \
+                                       "$P_IMG/$IMG_NAME:$TAG-aarch64"
           /usr/bin/podman tag "$IMG_NAME:$TAG" "$P_IMG/$IMG_NAME:$TAG"
           /usr/bin/podman images
           # Push the manifest list
