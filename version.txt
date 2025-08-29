@@ -5,5 +5,5 @@
 
 
 container_version() {
- $(base_version)
+ eval base_version
 }
