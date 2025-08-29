@@ -81,14 +81,27 @@ jobs:
       #      --tag "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_DEV }}" \
       #      .
       #     /usr/bin/podman images
-      
+      #
+      # - name: "Push `dev` image to registry"
+      #   run: |
+      #     S_IMG="${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_DEV }}"
+      #     P_IMG="docker.io/${{ secrets.DOCKERIO_REGISTRY }}"
+      #     IMG="$P_IMG/$S_IMG"
+      #     /usr/bin/podman tag "$S_IMG" "$IMG"
+      #     /usr/bin/podman push "$IMG"
+
       - name: "Push `dev` image to registry"
         run: |
-          S_IMG="${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_DEV }}"
           P_IMG="docker.io/${{ secrets.DOCKERIO_REGISTRY }}"
+          S_IMG="${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_DEV }}-amd64"
           IMG="$P_IMG/$S_IMG"
           /usr/bin/podman tag "$S_IMG" "$IMG"
           /usr/bin/podman push "$IMG"
+          S_IMG="${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_DEV }}-aarch64"
+          IMG="$P_IMG/$S_IMG"
+          /usr/bin/podman tag "$S_IMG" "$IMG"
+          /usr/bin/podman push "$IMG"
+
 
       - name: "Create and Push Multi-Arch Manifest"
         run: |
