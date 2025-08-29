@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.21.3
+ARG ALPINE_VERSION="${IMAGE_VERSION:='3.22.4'}"
 # ╭―――――――――――――-――――――――――――――――――――――――――――-――――――――――――――――――――――――――――――――╮
 # │                                                                           │
 # │ CONTAINER BUILD                                                           │
