@@ -12,11 +12,11 @@ on:
 jobs:
   linter:
     uses: gautada/cicd/.github/workflows/ci-linter.yaml@main
-  aarch64:
+  arm64:
     needs: linter
     uses: gautada/cicd/.github/workflows/ci-podman-arch.yaml@main
     with:
-      architecture: aarch64
+      architecture: arm64
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
