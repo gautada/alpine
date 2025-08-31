@@ -11,7 +11,7 @@ on:
 
 jobs:
   ci-aarch64:
-    uses: https://github.com/gautada/cicd/.github/workflows/ci-podman-arch.yml@main
+    uses: gautada/cicd/.github/workflows/ci-podman-arch.yml@main
     with:
       architecture: aarch64
     secrets:
