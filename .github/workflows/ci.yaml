@@ -1,6 +1,6 @@
 ---
 name: "Continuous Integration: Build and Publish Multi-Architecture Image"
-#FF=4
+#FF=5
 on:
   push:
     branches:
