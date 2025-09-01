@@ -27,7 +27,7 @@ jobs:
       architecture: "amd64"
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
-     REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
+      REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
   dev:
     needs: [arm64, amd64 ]
     uses: gautada/cicd/.github/workflows/ci-podman-dev.yaml@main
