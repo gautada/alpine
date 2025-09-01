@@ -13,6 +13,8 @@ on:
 jobs:
   linter:
     uses: gautada/cicd/.github/workflows/ci-linter.yaml@main
+  docker:
+    uses: gautada/cicd/.github/workflows/ci-docker-clean.yaml@main
   arm64:
     needs: linter
     uses: gautada/cicd/.github/workflows/ci-podman-arch.yaml@main
