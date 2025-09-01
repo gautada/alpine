@@ -1,6 +1,6 @@
 ---
 name: "Continuous Integration: Build and Publish Multi-Architecture Image"
-# FF:7
+# FF:8
 on:
   workflow_dispatch: {}
   push:
