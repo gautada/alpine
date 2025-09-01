@@ -2,6 +2,7 @@
 name: "Continuous Integration: Build and Publish Multi-Architecture Image"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - dev
