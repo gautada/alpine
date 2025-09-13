@@ -1,5 +1,6 @@
 ---
 name: "Continuous Integration: Build and Publish Multi-Architecture Image"
+# This is the generic reusable template for building containers
 
 on:
   workflow_dispatch: {}
@@ -39,6 +40,12 @@ jobs:
     uses: gautada/cicd/.github/workflows/ci-podman-dev.yaml@main
     with:
       architectures: '["arm64", "amd64"]'
+    secrets:
+      REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
+      REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
+  release:
+    needs: [dev]
+    uses: gautada/cicd/.github/workflows/cd-tag-latest.yaml@main
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
