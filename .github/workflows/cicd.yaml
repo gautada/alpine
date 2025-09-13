@@ -1,6 +1,6 @@
 ---
 name: "Continuous Integration: Build and Publish Multi-Architecture Image"
-# FF:8
+
 on:
   workflow_dispatch: {}
   push:
@@ -35,7 +35,7 @@ jobs:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
   dev:
-    needs: [arm64, amd64 ]
+    needs: [arm64, amd64]
     uses: gautada/cicd/.github/workflows/ci-podman-dev.yaml@main
     with:
       architectures: '["arm64", "amd64"]'
