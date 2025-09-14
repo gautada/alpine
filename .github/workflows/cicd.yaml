@@ -36,10 +36,10 @@ jobs:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
   integrate:
-    needs: [arm64, amd64]
+    needs: [build-arm64, build-amd64]
     uses: gautada/cicd/.github/workflows/ci-podman-dev.yaml@main
     with:
-      architectures: '["build-arm64", "build-amd64"]'
+      architectures: '["arm64", "amd64"]'
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
