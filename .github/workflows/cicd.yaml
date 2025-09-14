@@ -14,12 +14,12 @@ on:
 jobs:
   linter:
     uses: gautada/cicd/.github/workflows/ci-linter.yaml@main
-  docker:
-    uses: gautada/cicd/.github/workflows/ci-docker-clean.yaml@main
+  clean:
+    uses: gautada/cicd/.github/workflows/ci-registry-clean.yaml@main
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
-  arm64:
+  build-arm64:
     needs: linter
     uses: gautada/cicd/.github/workflows/ci-podman-arch.yaml@main
     with:
@@ -27,7 +27,7 @@ jobs:
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
-  amd64:
+  build-amd64:
     needs: linter
     uses: gautada/cicd/.github/workflows/ci-podman-arch.yaml@main
     with:
@@ -35,7 +35,7 @@ jobs:
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
-  dev:
+  integrate:
     needs: [arm64, amd64]
     uses: gautada/cicd/.github/workflows/ci-podman-dev.yaml@main
     with:
