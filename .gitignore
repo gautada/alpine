@@ -26,3 +26,5 @@ manifest/
 # that Docker is to ignore during the build process.
 .dockerignore
 .commit
+
+.env
