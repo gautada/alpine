@@ -1,4 +1,4 @@
-
+#!/bin/sh
 #
 # [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint) is the default
 # initial process which and executes all the applications and services that run in a container.
@@ -12,9 +12,14 @@
 /bin/echo "~~~~~~~~~~~~~~~~~~~~~~~~"
 /bin/echo
 
+# shellcheck disable=SC2124
 ENTRYPOINT_PARAMS="$@"
+
+# shellcheck disable=SC1091
+# shellcheck disable=SC4036
 . /etc/container/entrypoint
 
+# shellcheck disable=SC3028
 /bin/echo "[I] Container ($HOSTNAME $(container_version) as [$(/usr/bin/whoami)])"
 
 # /usr/sbin/crond -b -l 0 -L /var/log/crond
@@ -30,7 +35,7 @@ if [ $TEST -eq 1 ] ; then
  fi
 fi
  
-if [ -z $ENTRYPOINT_PARAMS ] ; then
+if [ -z "${ENTRYPOINT_PARAMS}" ] ; then
  /bin/echo " [I] Launch blocking application"
  container_entrypoint "$ENTRYPOINT_PARAMS" 
 else
