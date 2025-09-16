@@ -15,7 +15,7 @@ jobs:
   check:
     uses: gautada/cicd/.github/workflows/ci-linter.yaml@main
   build-arm64:
-    needs: linter
+    needs: check
     uses: gautada/cicd/.github/workflows/ci-podman-build.yaml@main
     with:
       architecture: "arm64"
@@ -23,7 +23,7 @@ jobs:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
   build-amd64:
-    needs: linter
+    needs: check
     uses: gautada/cicd/.github/workflows/ci-podman-build.yaml@main
     with:
       architecture: "amd64"
