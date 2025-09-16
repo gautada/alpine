@@ -81,7 +81,7 @@ RUN /bin/mkdir -p /etc/container/health.d \
 ARG USER=alpine
 ARG UID=1001
 ARG GID=1001
-ENTRYPOINT ["/bin/ash", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # ENTRYPOINT ["/usr/bin/container-entrypoint"]
 RUN /usr/sbin/groupadd --gid $UID $USER \
  && /usr/sbin/useradd --create-home --gid $GID --shell /bin/zsh \
