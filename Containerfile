@@ -47,7 +47,7 @@ COPY backup.sh /etc/container/backup
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-# COPY container-entrypoint /usr/bin/container-entrypoint
+COPY container-entrypoint.sh /usr/bin/container-entrypoint
 COPY entrypoint.sh /etc/container/entrypoint
 
 # ╭――――――――――――――――――――╮
@@ -82,6 +82,7 @@ ARG USER=alpine
 ARG UID=1001
 ARG GID=1001
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+# ENTRYPOINT ["/usr/bin/container-entrypoint"]
 RUN /usr/sbin/groupadd --gid $UID $USER \
  && /usr/sbin/useradd --create-home --gid $GID --shell /bin/zsh \
  --uid $UID $USER \
@@ -99,6 +100,7 @@ RUN /usr/sbin/groupadd --gid $UID $USER \
 FROM scratch
 COPY --from=container / /
 ENTRYPOINT ["/usr/bin/container-entrypoint"]
+# ENTRYPOINT ["zsh"]
 VOLUME /mnt/volumes/backup
 VOLUME /mnt/volumes/configmaps
 VOLUME /mnt/volumes/container
