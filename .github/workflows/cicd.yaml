@@ -46,7 +46,7 @@ jobs:
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
   test:
     needs: [clean]
-    uses: gautada/cicd/.github/workflows/ci-registry-test.yaml@main
+    uses: gautada/cicd/.github/workflows/ci-container-test.yaml@main
     secrets:
       REGISTRY_USERNAME: ${{ secrets.DOCKERIO_REGISTRY }}
       REGISTRY_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
