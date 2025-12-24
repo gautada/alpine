@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+echo "Starting 'alpine' as headless blocking server"
+_cmd="tail -f /dev/null"
+echo "COMMAND: ${_cmd}"
+su alpine -c "${_cmd}"
+
