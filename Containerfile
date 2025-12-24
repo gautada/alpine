@@ -15,7 +15,7 @@ LABEL org.opencontainers.image.license="Upstream"
 # ╭――――――――――――――――――――╮
 # │ VOLUMES            │
 # ╰――――――――――――――――――――╯
-RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container \ 
+RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/data \ 
     /mnt/volumes/backup /mnt/volumes/secrets  
                   
 # ╭――――――――――――――――――――╮
@@ -23,7 +23,7 @@ RUN /bin/mkdir -p /mnt/volumes/configmaps /mnt/volumes/container \
 # ╰――――――――――――――――――――╯
 RUN /bin/sed -i 's|dl-cdn.alpinelinux.org/alpine/|mirror.math.princeton.edu/pub/alpinelinux/|g' /etc/apk/repositories \
  && /sbin/apk add --no-cache bind-tools ca-certificates curl iputils \
-    nmap nmap-ncat git jq nano shadow sudo tzdata zsh
+    nmap nmap-ncat git jq nano s6 shadow sudo tzdata zsh
 
 # ╭―――――――――――――――――――╮
 # │ CONFIG (ROOT)     │
@@ -42,8 +42,14 @@ COPY backup.sh /etc/container/backup
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-COPY container-entrypoint.sh /usr/bin/container-entrypoint
-COPY entrypoint.sh /etc/container/entrypoint
+# COPY container-entrypoint.sh /usr/bin/container-entrypoint
+# COPY entrypoint.sh /etc/container/entrypoint
+
+# ╭――――――――――――――――――――╮
+# │ INIT               │
+# ╰――――――――――――――――――――╯
+RUN mkdir -p /etc/services.d
+# COPY container-init /etc/services.d/container/run
 
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
@@ -84,7 +90,7 @@ RUN /usr/sbin/groupadd --gid $UID $USER \
  && /usr/sbin/adduser $USER privileged \
 #  && /usr/sbin/chpasswd << "$USER:$USER" \
  && echo "$USER:$USER" | /usr/sbin/chpasswd \
- && /bin/chown -R $USER:$USER /mnt/volumes/container \
+ && /bin/chown -R $USER:$USER /mnt/volumes/data \
  && /bin/chown -R $USER:$USER /mnt/volumes/backup \
  && /bin/chown -R $USER:$USER /mnt/volumes/configmaps \
  && /bin/chown -R $USER:$USER /mnt/volumes/secrets
@@ -94,11 +100,12 @@ RUN /usr/sbin/groupadd --gid $UID $USER \
 # ╰――――――――――――――――――――╯
 FROM scratch
 COPY --from=container / /
-ENTRYPOINT ["/usr/bin/container-entrypoint"]
+# ENTRYPOINT ["/usr/bin/container-entrypoint"]
 # ENTRYPOINT ["zsh"]
+ENTRYPOINT [ "/usr/bin/s6-svscan" , "/etc/services.d" ]
 VOLUME /mnt/volumes/backup
 VOLUME /mnt/volumes/configmaps
-VOLUME /mnt/volumes/container
+VOLUME /mnt/volumes/data
 VOLUME /mnt/volumes/secrets
 # VOLUME /mnt/volumes/secrets/namespace
 # VOLUME /mnt/volumes/secrets/container
