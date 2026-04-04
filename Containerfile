@@ -35,21 +35,21 @@ RUN /bin/mkdir -p /etc/container \
 # ╭―――――――――――――――――――╮
 # │ BACKUP            │
 # ╰―――――――――――――――――――╯
-# COPY container-backup /usr/bin/container-backup
+COPY container-backup.sh /usr/bin/container-backup
 RUN /bin/ln -fsv /usr/bin/container-backup /etc/periodic/hourly/container-backup
 COPY backup.sh /etc/container/backup
 
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-# COPY container-entrypoint.sh /usr/bin/container-entrypoint
-# COPY entrypoint.sh /etc/container/entrypoint
+COPY container-entrypoint.sh /usr/bin/container-entrypoint
+COPY entrypoint.sh /etc/container/entrypoint
 
 # ╭――――――――――――――――――――╮
 # │ INIT               │
 # ╰――――――――――――――――――――╯
 RUN mkdir -p /etc/services.d
-# COPY container-init /etc/services.d/container/run
+COPY container-init /etc/services.d/container/run
 
 # ╭――――――――――――――――――――╮
 # │ PRIVILEGE          │
@@ -66,15 +66,15 @@ COPY container-version.sh /usr/bin/container-version
 # ╭――――――――――――――――――――╮
 # │ HEALTH             │
 # ╰――――――――――――――――――――╯
-# COPY container-health /usr/bin/container-health
-# COPY health /etc/container/health
+COPY container-health.sh /usr/bin/container-health
+COPY health.txt /etc/container/health
 RUN /bin/mkdir -p /etc/container/health.d \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-liveness \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-readiness \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-startup \
  && /bin/ln -fsv /usr/bin/container-health /usr/bin/container-test
-# COPY cron.health /etc/container/health.d/cron.health
-# COPY os.test /etc/container/health.d/os.test
+COPY cron.health.sh /etc/container/health.d/cron.health
+COPY os-test.sh /etc/container/health.d/os.test
 
 # ╭――――――――――――――――――――╮
 # │ USER               │
