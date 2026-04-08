@@ -13,8 +13,15 @@ CACHE="$BACKUP/cache"
 cd $CACHE
 
 /bin/su "$USER" -c ". /etc/container/backup ; container_backup"
-CONTAINER="$(/bin/hostname | awk -F '-' '{print $1}')"
-ARCHIVE="$BACKUP/$(/bin/date +%H)-$CONTAINER.tgz"
+
+# Use unique identifier for backup filename to avoid collisions
+if [ -n "$K8S_POD_NAME" ]; then
+    INSTANCE_ID="$K8S_POD_NAME"
+else
+    INSTANCE_ID="$(/bin/hostname)"
+fi
+
+ARCHIVE="$BACKUP/$(/bin/date +%H)-$INSTANCE_ID.tgz"
 /bin/tar  --create --gzip --file="$ARCHIVE" --verbose ./*
 /bin/mv -v "$ARCHIVE" /mnt/volumes/backup/
 
