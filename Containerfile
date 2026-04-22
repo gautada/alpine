@@ -43,6 +43,7 @@ COPY backup.sh /etc/container/backup
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
 COPY container-entrypoint.sh /usr/bin/container-entrypoint
+RUN chmod +x /usr/bin/container-entrypoint
 COPY entrypoint.sh /etc/container/entrypoint
 
 # ╭――――――――――――――――――――╮
